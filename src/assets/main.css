@@ -25,11 +25,7 @@ a,
   body {
     display: flex;
     place-items: center;
+    flex-direction: column;
   }
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
 }
