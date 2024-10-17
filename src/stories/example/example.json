@@ -1,0 +1,353 @@
+{
+    "nodes": [
+        {
+      "id": "start",
+      "text": "Bienvenue sur cette histoire d'example",
+      "node_type": "text",
+      "minutes_to_wait": "0",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "2f1e0b7b-5dda-4b5f-a3ee-a744563eb9af",
+      "text": "Nous essayons ici les différentes fonctionnalités. Vers quelle fin veux-tu aller ?",
+      "node_type": "text",
+      "minutes_to_wait": "0",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "659ce6ef-e818-4301-8c6f-87cb66795ae3",
+      "text": "la fin heureuse",
+      "node_type": "choice",
+      "minutes_to_wait": "0",
+      "is_user": "true",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "4b143c9b-1d29-45ac-95a9-058b63982dab",
+      "text": "la fin malheureuse",
+      "node_type": "choice",
+      "minutes_to_wait": "0",
+      "is_user": "true",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "73696f50-4db7-457c-9c4f-bdcf60261e84",
+      "text": "perdu",
+      "node_type": "bad",
+      "minutes_to_wait": "0",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "977edcef-2589-4ce3-8303-af2020b60996",
+      "text": "un dialogue avec un délai",
+      "node_type": "choice",
+      "minutes_to_wait": "0",
+      "is_user": "true",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "e37c9b1e-3c25-4731-83a1-f58a438f4f39",
+      "text": "gagné",
+      "node_type": "good",
+      "minutes_to_wait": "0",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "7632ad5e-e7b4-44ef-bc36-74f7770ddc0b",
+      "text": "très bien, tu devrais voir ça après 10 minutes (du jeu)",
+      "node_type": "text",
+      "minutes_to_wait": "10",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "f009a6f9-421b-4fa4-9a4c-781d78463ba5",
+      "text": "et ça après 20 minutes",
+      "node_type": "text",
+      "minutes_to_wait": "20",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "dd46e6a3-2908-4a5b-990c-81b6f89c9152",
+      "text": "On peut continuer",
+      "node_type": "text",
+      "minutes_to_wait": "0",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "4a22a2f8-1766-4d3c-a77c-745a6b6b3e23",
+      "text": "Chemin alternatif",
+      "node_type": "choice",
+      "minutes_to_wait": "0",
+      "is_user": "true",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "b3ae1452-35c3-48cf-b1db-a111ad1465d0",
+      "text": "Je peux manger ?",
+      "node_type": "text",
+      "minutes_to_wait": "0",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "1df9c4d0-d70d-4eac-a810-ddacf5c00483",
+      "text": "Oui",
+      "node_type": "choice",
+      "minutes_to_wait": "0",
+      "is_user": "true",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "à mangé",
+        "activate_value": "oui"
+      }
+    }
+  ,  {
+      "id": "167d661f-b91d-4750-afa6-3a83dfab6b0f",
+      "text": "Non",
+      "node_type": "choice",
+      "minutes_to_wait": "0",
+      "is_user": "true",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "à mangé",
+        "activate_value": "non"
+      }
+    }
+  ,  {
+      "id": "a0848e19-53e0-433a-83aa-3b94b6305bfa",
+      "text": "Je suis bloqué dans un trou",
+      "node_type": "text",
+      "minutes_to_wait": "0",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "15a99e1d-7849-4e90-b20c-cb9c3b1f3bcc",
+      "text": "Essaye de sortir",
+      "node_type": "choice",
+      "minutes_to_wait": "0",
+      "is_user": "true",
+      "conditional_activation": {
+        "activated_by_key": "à mangé",
+        "activated_by_value": "oui",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "2231d31f-eb78-445f-90e5-09ddb0d59e04",
+      "text": "il va falloir attendre de l'aide",
+      "node_type": "choice",
+      "minutes_to_wait": "0",
+      "is_user": "true",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "0ef00ace-093a-498a-b38e-5d93aba9fd26",
+      "text": "Je suis sorti, merci",
+      "node_type": "text",
+      "minutes_to_wait": "0",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "14fa5dbf-5f7b-443b-84f4-088d384ae8b6",
+      "text": "il est partit",
+      "node_type": "good",
+      "minutes_to_wait": "0",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  ,  {
+      "id": "4cf29ec2-71f3-4b0a-8b97-8aa4b3bf7831",
+      "text": "il est mort",
+      "node_type": "bad",
+      "minutes_to_wait": "10",
+      "is_user": "false",
+      "conditional_activation": {
+        "activated_by_key": "",
+        "activated_by_value": "",
+        "activate_key": "",
+        "activate_value": ""
+      }
+    }
+  
+    ],
+    "edges": [
+        {
+      "from": "start",
+      "to": "2f1e0b7b-5dda-4b5f-a3ee-a744563eb9af"
+    }
+  ,  {
+      "from": "2f1e0b7b-5dda-4b5f-a3ee-a744563eb9af",
+      "to": "659ce6ef-e818-4301-8c6f-87cb66795ae3"
+    }
+  ,  {
+      "from": "2f1e0b7b-5dda-4b5f-a3ee-a744563eb9af",
+      "to": "4b143c9b-1d29-45ac-95a9-058b63982dab"
+    }
+  ,  {
+      "from": "4b143c9b-1d29-45ac-95a9-058b63982dab",
+      "to": "73696f50-4db7-457c-9c4f-bdcf60261e84"
+    }
+  ,  {
+      "from": "2f1e0b7b-5dda-4b5f-a3ee-a744563eb9af",
+      "to": "977edcef-2589-4ce3-8303-af2020b60996"
+    }
+  ,  {
+      "from": "659ce6ef-e818-4301-8c6f-87cb66795ae3",
+      "to": "e37c9b1e-3c25-4731-83a1-f58a438f4f39"
+    }
+  ,  {
+      "from": "977edcef-2589-4ce3-8303-af2020b60996",
+      "to": "7632ad5e-e7b4-44ef-bc36-74f7770ddc0b"
+    }
+  ,  {
+      "from": "7632ad5e-e7b4-44ef-bc36-74f7770ddc0b",
+      "to": "f009a6f9-421b-4fa4-9a4c-781d78463ba5"
+    }
+  ,  {
+      "from": "f009a6f9-421b-4fa4-9a4c-781d78463ba5",
+      "to": "dd46e6a3-2908-4a5b-990c-81b6f89c9152"
+    }
+  ,  {
+      "from": "2f1e0b7b-5dda-4b5f-a3ee-a744563eb9af",
+      "to": "4a22a2f8-1766-4d3c-a77c-745a6b6b3e23"
+    }
+  ,  {
+      "from": "4a22a2f8-1766-4d3c-a77c-745a6b6b3e23",
+      "to": "b3ae1452-35c3-48cf-b1db-a111ad1465d0"
+    }
+  ,  {
+      "from": "b3ae1452-35c3-48cf-b1db-a111ad1465d0",
+      "to": "1df9c4d0-d70d-4eac-a810-ddacf5c00483"
+    }
+  ,  {
+      "from": "b3ae1452-35c3-48cf-b1db-a111ad1465d0",
+      "to": "167d661f-b91d-4750-afa6-3a83dfab6b0f"
+    }
+  ,  {
+      "from": "1df9c4d0-d70d-4eac-a810-ddacf5c00483",
+      "to": "dd46e6a3-2908-4a5b-990c-81b6f89c9152"
+    }
+  ,  {
+      "from": "167d661f-b91d-4750-afa6-3a83dfab6b0f",
+      "to": "dd46e6a3-2908-4a5b-990c-81b6f89c9152"
+    }
+  ,  {
+      "from": "dd46e6a3-2908-4a5b-990c-81b6f89c9152",
+      "to": "a0848e19-53e0-433a-83aa-3b94b6305bfa"
+    }
+  ,  {
+      "from": "a0848e19-53e0-433a-83aa-3b94b6305bfa",
+      "to": "15a99e1d-7849-4e90-b20c-cb9c3b1f3bcc"
+    }
+  ,  {
+      "from": "a0848e19-53e0-433a-83aa-3b94b6305bfa",
+      "to": "2231d31f-eb78-445f-90e5-09ddb0d59e04"
+    }
+  ,  {
+      "from": "15a99e1d-7849-4e90-b20c-cb9c3b1f3bcc",
+      "to": "0ef00ace-093a-498a-b38e-5d93aba9fd26"
+    }
+  ,  {
+      "from": "0ef00ace-093a-498a-b38e-5d93aba9fd26",
+      "to": "14fa5dbf-5f7b-443b-84f4-088d384ae8b6"
+    }
+  ,  {
+      "from": "2231d31f-eb78-445f-90e5-09ddb0d59e04",
+      "to": "4cf29ec2-71f3-4b0a-8b97-8aa4b3bf7831"
+    }
+  
+    ]
+  }
+  
