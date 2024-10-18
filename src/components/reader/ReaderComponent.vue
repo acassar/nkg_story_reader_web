@@ -3,12 +3,17 @@ import { onMounted, ref } from 'vue';
 import ChatBubble from '../chat/ChatBubble.vue';
 import ExampleStory from "@/stories/example/example.json"
 import { Story } from '@/class/StoryClass';
+import { StoryItem } from '@/class/StoryItem';
 
 const currentStory = ref<Story>()
+const storyItems = ref<StoryItem[]>()
+
+
 
 const loadStory = async () => {
     try {
         currentStory.value = new Story("Example", ExampleStory)
+        storyItems.value = [currentStory.value.items.find(e => e.id === 'start') ?? currentStory.value.items[0]]
     } catch(error) {
         console.log(error)
     }
@@ -26,7 +31,7 @@ const getItemPosition = (index: number): 'left' | 'right' => {
 
 <template>
 <div class="container">
-    <ChatBubble :position="getItemPosition(index)" :story-item="item" :key="index" v-for="(item, index) of currentStory?.items" :class="getItemPosition"/>
+    <ChatBubble :position="getItemPosition(index)" :story-item="item" :key="index" v-for="(item, index) of storyItems" :class="getItemPosition"/>
 </div>
 </template>
 
