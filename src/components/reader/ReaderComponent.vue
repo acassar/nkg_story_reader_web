@@ -18,12 +18,21 @@ onMounted(() => {
     loadStory();
 })
 
+const getItemPosition = (index: number): 'left' | 'right' => {
+    return index%2 == 0 ? "left" : "right"
+}
+
 </script>
 
 <template>
-<ChatBubble :story-item="item" :key="index" v-for="(item, index) of currentStory?.items" />
+<div class="container">
+    <ChatBubble :position="getItemPosition(index)" :story-item="item" :key="index" v-for="(item, index) of currentStory?.items" :class="getItemPosition"/>
+</div>
 </template>
 
 <style scoped>
-
+.container {
+    display: flex;
+    flex-direction: column;
+}
 </style>
