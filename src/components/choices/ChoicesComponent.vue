@@ -15,7 +15,7 @@ defineEmits<(e: 'selectItem', choice: StoryItem) => void>()
     v-for="choice in choices"
     @click="$emit('selectItem', choice)"
   >
-    {{ choice.text }}
+    <h3>{{ choice.text }}</h3>
   </ButtonComponent>
 </template>
 

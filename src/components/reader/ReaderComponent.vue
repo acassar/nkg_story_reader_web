@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
 import ChatBubble from '../chat/ChatBubble.vue'
-import ExampleStory from '@/stories/example/example.json'
-import CaveStory from '@/stories/cave/cave.json'
 import { Story } from '@/class/StoryClass'
 import { StoryItem } from '@/class/StoryItem'
 import ChoicesComponent from '../choices/ChoicesComponent.vue'
 import AnsweringLoader from '../common/loader/AnsweringLoader.vue'
+import { StoryService } from '@/services/storyService'
 
-const currentStory = ref<Story>()
+const props = defineProps<{
+  story: Story
+}>()
+
+const { getChildren } = StoryService(props.story)
 const storyItems = ref<StoryItem[]>([])
 const isAnswering = ref<boolean>(false)
 
@@ -17,26 +20,23 @@ const lastItem = computed(() =>
     ? storyItems.value![storyItems.value!.length - 1]
     : undefined,
 )
+
+const lastItemChildren = computed<StoryItem[]>(() => {
+  if (!lastItem.value) return []
+  return getChildren(lastItem.value)
+})
+
 const choices = computed(() => {
   if (!lastItem.value) return []
-  return getChildren(lastItem.value)?.filter(e => e.nodeType === 'CHOICE')
+  return lastItemChildren.value.filter(e => e.nodeType === 'CHOICE')
 })
 
 onMounted(() => {
-  loadStory()
+  //setting the first item selected => story start
+  selectItem(
+    props.story.items.find(e => e.id === 'start') ?? props.story.items[0],
+  )
 })
-
-const loadStory = async () => {
-  try {
-    currentStory.value = new Story('Cave', CaveStory)
-    selectItem(
-      currentStory.value.items.find(e => e.id === 'start') ??
-        currentStory.value.items[0],
-    )
-  } catch (error) {
-    console.log(error)
-  }
-}
 
 const getItemPosition = (storyItem: StoryItem): 'left' | 'right' => {
   console.log(storyItem)
@@ -49,15 +49,11 @@ const selectItem = (item: StoryItem) => {
   handleAutoText(item)
 }
 
-const getChildren = (storyItem: StoryItem) => {
-  const relatedNodes = currentStory.value?.edges.filter(
-    edge => edge.from === storyItem?.id,
-  )
-  return currentStory.value?.items.filter(child =>
-    relatedNodes?.map(e => e.to).includes(child.id),
-  )
-}
-
+/**
+ * Handles the automatic text generation for a given story item, when the story character keeps talking without asking for a response
+ * @param {StoryItem} item - The story item for which the text needs to be generated.
+ * @returns {Promise<void>} - A Promise that resolves when the text generation is complete.
+ */
 const handleAutoText = async (item: StoryItem) => {
   const children = getChildren(item)
   if (children?.length === 1 && children[0].nodeType === 'TEXT') {
