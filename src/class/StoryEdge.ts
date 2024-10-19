@@ -1,6 +1,6 @@
 export class StoryEdge {
-  private from: string
-  private to: string
+  from: string
+  to: string
 
   constructor(from: string, to: string) {
     this.from = from

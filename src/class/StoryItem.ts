@@ -72,7 +72,7 @@ export class StoryItem {
       case 'text':
         return 'TEXT'
       case 'choice':
-        return 'TEXT'
+        return 'CHOICE'
       default:
         throw new Error('Node type not recognized')
     }
