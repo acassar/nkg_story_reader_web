@@ -22,6 +22,12 @@
 
   --app-padding: 2rem;
   --app-available-height: calc(100vh - 2 * var(--app-padding));
+
+  --palette-primary: #145c9e;
+  --palette-secondary: #1f271b;
+  --palette-tertiary: #0b4f6c;
+  --palette-other1: #cbb9a8;
+  --palette-other2: #dcc7be;
 }
 
 /* semantic color variables for this project */

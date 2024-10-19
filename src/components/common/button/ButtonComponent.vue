@@ -10,7 +10,7 @@ defineEmits<(e: 'click') => void>()
 
 <style scoped>
 button {
-  background-color: var(--vt-c-indigo);
+  background-color: var(--palette-primary);
   color: white;
   margin: 0.2rem;
   border: solid 1px transparent;
