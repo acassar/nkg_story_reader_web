@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import ChatBubble from '../chat/ChatBubble.vue'
 import ExampleStory from '@/stories/example/example.json'
 import CaveStory from '@/stories/cave/cave.json'
@@ -56,9 +56,21 @@ const getChildren = (storyItem: StoryItem) => {
   )
 }
 
-const handleAutoText = (item: StoryItem) => {
+const handleAutoText = async (item: StoryItem) => {
   const children = getChildren(item)
-  if (children?.length === 1) selectItem(children.pop()!)
+  if (children?.length === 1 && children[0].nodeType === 'TEXT')
+    selectItem(children.pop()!)
+  await nextTick()
+  scrollToBottom()
+}
+
+const scrollToBottom = () => {
+  const chatElement = document.getElementById('chat-component')
+  if (chatElement)
+    chatElement.scroll({
+      top: chatElement.scrollHeight,
+      behavior: 'smooth',
+    })
 }
 </script>
 
@@ -70,7 +82,7 @@ const handleAutoText = (item: StoryItem) => {
         @select-item="selectItem"
       ></ChoicesComponent>
     </div>
-    <div class="container chat">
+    <div id="chat-component" class="container chat">
       <div class="bubble-container">
         <ChatBubble
           :position="getItemPosition(item)"
