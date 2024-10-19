@@ -6,9 +6,11 @@ import CaveStory from '@/stories/cave/cave.json'
 import { Story } from '@/class/StoryClass'
 import { StoryItem } from '@/class/StoryItem'
 import ChoicesComponent from '../choices/ChoicesComponent.vue'
+import AnsweringLoader from '../common/loader/AnsweringLoader.vue'
 
 const currentStory = ref<Story>()
 const storyItems = ref<StoryItem[]>([])
+const isAnswering = ref<boolean>(false)
 
 const lastItem = computed(() =>
   (storyItems.value?.length ?? 0) > 0
@@ -17,7 +19,7 @@ const lastItem = computed(() =>
 )
 const choices = computed(() => {
   if (!lastItem.value) return []
-  return getChildren(lastItem.value)
+  return getChildren(lastItem.value)?.filter(e => e.nodeType === 'CHOICE')
 })
 
 onMounted(() => {
@@ -58,10 +60,35 @@ const getChildren = (storyItem: StoryItem) => {
 
 const handleAutoText = async (item: StoryItem) => {
   const children = getChildren(item)
-  if (children?.length === 1 && children[0].nodeType === 'TEXT')
-    selectItem(children.pop()!)
+  if (children?.length === 1 && children[0].nodeType === 'TEXT') {
+    isAnswering.value = true
+    setTimeout(() => {
+      isAnswering.value = false
+      selectItem(children.pop()!)
+    }, getTextWritingSpeed(children[0]))
+  }
   await nextTick()
   scrollToBottom()
+}
+
+/**
+ * Calculates the writing speed for the given story item.
+ * @param {StoryItem} storyItem - The story item for which the writing speed needs to be calculated.
+ * @returns {number} - The calculated writing speed in milliseconds.
+ */
+const getTextWritingSpeed = (storyItem: StoryItem) => {
+  const MINIMUM_WRITING_SPEED = 1000
+  const MAXIMUM_WRITING_SPEED = 10000
+  const WORD_PER_SECOND_SPEED = 8
+  const words = storyItem.text.split(' ')
+  const speed = Math.max(
+    Math.min(
+      (words.length / WORD_PER_SECOND_SPEED) * 1000,
+      MINIMUM_WRITING_SPEED,
+    ),
+    MAXIMUM_WRITING_SPEED,
+  )
+  return speed
 }
 
 const scrollToBottom = () => {
@@ -91,6 +118,7 @@ const scrollToBottom = () => {
           v-for="(item, index) of storyItems"
           :class="getItemPosition"
         />
+        <AnsweringLoader v-if="isAnswering" />
       </div>
     </div>
   </div>
@@ -126,5 +154,16 @@ const scrollToBottom = () => {
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background-color: var(--vt-c-black-soft);
+  color: var(--vt-c-white-soft);
+  font-size: 1.2rem;
+  padding: 10px;
 }
 </style>
