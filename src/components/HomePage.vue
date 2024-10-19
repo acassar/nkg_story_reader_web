@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ReaderComponentVue from "@/components/reader/ReaderComponent.vue"
+import ReaderComponentVue from '@/components/reader/ReaderComponent.vue'
 </script>
 
 <template>
