@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 const sendContainer = ref<HTMLElement | null>()
+const sendIcon = ref<HTMLElement | null>()
 const screenWidth = ref(0)
 
 const iconScale = computed(() => {
@@ -16,9 +17,10 @@ const SPEED = 20
 
 const emit = defineEmits<(e: 'typing:end') => void>()
 
-onMounted(
-  () => (sendContainer.value = document.getElementById('send-container')),
-)
+onMounted(() => {
+  sendContainer.value = document.getElementById('send-container')
+  sendIcon.value = document.getElementById('send-icon')
+})
 
 watch(
   () => props.text,
@@ -51,6 +53,7 @@ const endType = () => {
   emit('typing:end')
   reset()
   sendContainer.value!.classList.remove('send-animation')
+  sendIcon.value!.classList.remove('icon-animation')
 }
 
 const typeWrite = () => {
@@ -63,6 +66,7 @@ const typeWrite = () => {
     setTimeout(typeWrite, SPEED)
   } else {
     sendContainer.value!.classList.add('send-animation')
+    sendIcon.value!.classList.add('icon-animation')
     setTimeout(endType, 500)
   }
 }
@@ -75,7 +79,7 @@ const typeWrite = () => {
       &nbsp;
     </div>
     <div>
-      <v-icon :scale="iconScale" name="bi-send-fill" />
+      <v-icon id="send-icon" :scale="iconScale" name="bi-send-fill" />
     </div>
   </div>
 </template>
@@ -96,15 +100,28 @@ const typeWrite = () => {
   animation: send 500ms forwards;
 }
 
+.icon-animation {
+  animation: send-icon-animation 500ms infinite;
+}
+
 @keyframes send {
   0% {
     background-color: var(--vt-c-black-mute);
   }
   50% {
-    background-color: rgb(94, 94, 94);
+    background-color: rgb(51, 51, 51);
   }
   100% {
     background-color: var(--vt-c-black-mute);
+  }
+}
+
+@keyframes send-icon-animation {
+  from {
+    color: var(--color-text);
+  }
+  to {
+    color: var(--palette-primary);
   }
 }
 </style>

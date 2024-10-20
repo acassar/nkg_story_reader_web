@@ -17,6 +17,7 @@ defineProps<{
   padding: 0.4rem 1rem;
   border-radius: 1rem;
   animation: chatBubbleAppear 2s forwards;
+  cursor: default;
 }
 
 .left {

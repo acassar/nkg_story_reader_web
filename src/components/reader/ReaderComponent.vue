@@ -29,7 +29,7 @@ const lastItemChildren = computed<StoryItem[]>(() => {
 })
 
 const choices = computed(() => {
-  if (!lastItem.value) return []
+  if (!lastItem.value || userAnsweringItem.value) return []
   return lastItemChildren.value.filter(e => e.nodeType === 'CHOICE')
 })
 
