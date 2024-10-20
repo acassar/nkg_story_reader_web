@@ -21,7 +21,9 @@
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
   --app-padding: 2rem;
+  --app-padding-mobile: 1rem;
   --app-available-height: calc(100vh - 2 * var(--app-padding));
+  --app-available-height-mobile: calc(100vh - 2 * var(--app-padding-mobile));
 
   --palette-primary: #145c9e;
   --palette-secondary: #1f271b;

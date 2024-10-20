@@ -177,4 +177,25 @@ const scrollToBottom = () => {
   font-size: 1.2rem;
   padding: 10px;
 }
+
+@media screen and (max-width: 800px) {
+  .views {
+    flex-direction: column-reverse;
+    height: var(--app-available-height-mobile);
+    font-size: small;
+  }
+
+  .container {
+    padding: 0.5rem;
+  }
+
+  .chat {
+    height: 0;
+    flex: 1;
+  }
+
+  .choices {
+    flex: 0;
+  }
+}
 </style>

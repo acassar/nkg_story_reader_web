@@ -13,3 +13,9 @@
   width: 20px;
   height: 20px;
 }
+
+@media screen and (max-width: 800px) {
+  #app {
+    padding: var(--app-padding-mobile);
+  }
+}

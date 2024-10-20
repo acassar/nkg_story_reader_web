@@ -15,8 +15,18 @@ defineEmits<(e: 'selectItem', choice: StoryItem) => void>()
     v-for="choice in choices"
     @click="$emit('selectItem', choice)"
   >
-    <h3>{{ choice.text }}</h3>
+    <span>{{ choice.text }}</span>
   </ButtonComponent>
 </template>
 
-<style scoped></style>
+<style scoped>
+button {
+  font-size: medium;
+}
+
+@media screen and (max-width: 800px) {
+  button {
+    font-size: small;
+  }
+}
+</style>

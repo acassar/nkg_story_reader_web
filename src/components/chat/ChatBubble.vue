@@ -12,25 +12,25 @@ defineProps<{
 </template>
 
 <style scoped>
+.bubble {
+  margin: 1rem;
+  padding: 0.4rem 1rem;
+  border-radius: 1rem;
+  animation: chatBubbleAppear 2s forwards;
+}
+
 .left {
   align-self: self-start;
-  margin-right: 10rem !important;
+  margin-right: 10rem;
   background-color: var(--palette-other2);
   color: #000;
 }
 
 .right {
   align-self: self-end;
-  margin-left: 10rem !important;
+  margin-left: 10rem;
   background-color: var(--palette-primary);
   color: var(--palette-other2);
-}
-
-.bubble {
-  margin: 1rem;
-  padding: 0.4rem 1rem;
-  border-radius: 1rem;
-  animation: chatBubbleAppear 2s forwards;
 }
 
 @keyframes chatBubbleAppear {
@@ -45,6 +45,16 @@ defineProps<{
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .left {
+    margin-right: 3rem;
+  }
+
+  .right {
+    margin-left: 3rem;
   }
 }
 </style>

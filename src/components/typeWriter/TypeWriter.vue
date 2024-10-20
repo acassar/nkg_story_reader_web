@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 const sendContainer = ref<HTMLElement | null>()
+const screenWidth = ref(0)
+
+const iconScale = computed(() => {
+  if (screenWidth.value <= 800) return 1
+  return 1.5
+})
 
 const props = defineProps<{
   text: string | undefined
@@ -21,6 +27,20 @@ watch(
     typeWrite()
   },
 )
+
+onMounted(() => {
+  nextTick(() => {
+    window.addEventListener('resize', setScreenWidth)
+  })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', setScreenWidth)
+})
+
+const setScreenWidth = () => {
+  screenWidth.value = window.screen.width
+}
 
 const reset = () => {
   i.value = 0
@@ -55,7 +75,7 @@ const typeWrite = () => {
       &nbsp;
     </div>
     <div>
-      <v-icon :scale="1.5" name="bi-send-fill" />
+      <v-icon :scale="iconScale" name="bi-send-fill" />
     </div>
   </div>
 </template>
@@ -63,6 +83,7 @@ const typeWrite = () => {
 .input-container {
   display: flex;
   justify-content: space-between;
+  align-content: center;
   width: 100%;
   min-height: min-content;
   padding: 10px;
