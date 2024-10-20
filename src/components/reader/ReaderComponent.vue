@@ -115,8 +115,8 @@ const scrollToBottom = () => {
         @select-item="selectItem"
       ></ChoicesComponent>
     </div>
-    <div id="chat-component" class="container chat">
-      <div class="bubble-container">
+    <div class="container chat">
+      <div id="chat-component" class="bubble-container">
         <ChatBubble
           :position="getItemPosition(item)"
           :story-item="item"
@@ -128,8 +128,7 @@ const scrollToBottom = () => {
       </div>
       <TypeWriter
         @typing:end="userEndedAnswering"
-        v-if="userAnsweringItem"
-        :text="userAnsweringItem.text"
+        :text="userAnsweringItem?.text"
       ></TypeWriter>
     </div>
   </div>
@@ -153,8 +152,7 @@ const scrollToBottom = () => {
   background-color: var(--vt-c-black-soft);
   border-radius: 0.5rem;
   flex: 2;
-  overflow-y: scroll;
-  min-height: var(--app-available-height);
+  height: var(--app-available-height);
 }
 
 .choices {
@@ -165,6 +163,8 @@ const scrollToBottom = () => {
   display: flex;
   flex-direction: column;
   flex: 1;
+  overflow-y: scroll;
+  padding-bottom: 30px;
 }
 
 .loading {

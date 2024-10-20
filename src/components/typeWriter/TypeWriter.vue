@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps<{
-  text: string
+  text: string | undefined
 }>()
 const i = ref(0)
 const SPEED = 20
-
-onMounted(() => {
-  typeWrite()
-})
 
 const emit = defineEmits<(e: 'typing:end') => void>()
 
@@ -32,6 +28,7 @@ const endType = () => {
 }
 
 const typeWrite = () => {
+  if (!props.text) return
   if (i.value < props.text.length) {
     document.getElementById('chat-input')!.innerHTML += props.text.charAt(
       i.value,
@@ -45,7 +42,25 @@ const typeWrite = () => {
 </script>
 
 <template>
-  <span id="chat-input" />
+  <div class="input-container">
+    <div>
+      <span id="chat-input" />
+      &nbsp;
+    </div>
+    <div>
+      <v-icon :scale="1.5" name="bi-send-fill" />
+    </div>
+  </div>
 </template>
-
-<style scoped></style>
+<style scoped>
+.input-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  min-height: min-content;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: var(--vt-c-black-mute);
+  columns: black;
+}
+</style>
