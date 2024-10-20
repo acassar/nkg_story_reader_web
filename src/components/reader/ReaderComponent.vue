@@ -6,6 +6,7 @@ import { StoryItem } from '@/class/StoryItem'
 import ChoicesComponent from '../choices/ChoicesComponent.vue'
 import AnsweringLoader from '../common/loader/AnsweringLoader.vue'
 import { StoryService } from '@/services/storyService'
+import TypeWriter from '../typeWriter/TypeWriter.vue'
 
 const props = defineProps<{
   story: Story
@@ -13,7 +14,8 @@ const props = defineProps<{
 
 const { getChildren } = StoryService(props.story)
 const storyItems = ref<StoryItem[]>([])
-const isAnswering = ref<boolean>(false)
+const isCharacterAnswering = ref<boolean>(false)
+const userAnsweringItem = ref<StoryItem>()
 
 const lastItem = computed(() =>
   (storyItems.value?.length ?? 0) > 0
@@ -33,34 +35,42 @@ const choices = computed(() => {
 
 onMounted(() => {
   //setting the first item selected => story start
-  selectItem(
-    props.story.items.find(e => e.id === 'start') ?? props.story.items[0],
-  )
+  addItem(props.story.items.find(e => e.id === 'start') ?? props.story.items[0])
 })
 
 const getItemPosition = (storyItem: StoryItem): 'left' | 'right' => {
-  console.log(storyItem)
   if (storyItem.nodeType === 'CHOICE') return 'right'
   return 'left'
 }
 
 const selectItem = (item: StoryItem) => {
+  userAnsweringItem.value = item
+}
+
+const addItem = (item: StoryItem) => {
   storyItems.value?.push(item)
   handleAutoText(item)
 }
 
+const userEndedAnswering = () => {
+  if (!userAnsweringItem.value)
+    throw Error('Technical error: user typing item not available')
+  addItem(userAnsweringItem.value)
+  userAnsweringItem.value = undefined
+}
+
 /**
- * Handles the automatic text generation for a given story item, when the story character keeps talking without asking for a response
+ * Handles the automatic text generation for a given story item. It keeps displaying the character texts.
  * @param {StoryItem} item - The story item for which the text needs to be generated.
  * @returns {Promise<void>} - A Promise that resolves when the text generation is complete.
  */
 const handleAutoText = async (item: StoryItem) => {
   const children = getChildren(item)
   if (children?.length === 1 && children[0].nodeType === 'TEXT') {
-    isAnswering.value = true
+    isCharacterAnswering.value = true
     setTimeout(() => {
-      isAnswering.value = false
-      selectItem(children.pop()!)
+      isCharacterAnswering.value = false
+      addItem(children.pop()!)
     }, getTextWritingSpeed(children[0]))
   }
   await nextTick()
@@ -114,8 +124,13 @@ const scrollToBottom = () => {
           v-for="(item, index) of storyItems"
           :class="getItemPosition"
         />
-        <AnsweringLoader v-if="isAnswering" />
+        <AnsweringLoader v-if="isCharacterAnswering" />
       </div>
+      <TypeWriter
+        @typing:end="userEndedAnswering"
+        v-if="userAnsweringItem"
+        :text="userAnsweringItem.text"
+      ></TypeWriter>
     </div>
   </div>
 </template>
