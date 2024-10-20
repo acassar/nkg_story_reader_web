@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+const sendContainer = ref<HTMLElement | null>()
 
 const props = defineProps<{
   text: string | undefined
@@ -8,6 +9,10 @@ const i = ref(0)
 const SPEED = 20
 
 const emit = defineEmits<(e: 'typing:end') => void>()
+
+onMounted(
+  () => (sendContainer.value = document.getElementById('send-container')),
+)
 
 watch(
   () => props.text,
@@ -25,6 +30,7 @@ const reset = () => {
 const endType = () => {
   emit('typing:end')
   reset()
+  sendContainer.value!.classList.remove('send-animation')
 }
 
 const typeWrite = () => {
@@ -36,13 +42,14 @@ const typeWrite = () => {
     i.value++
     setTimeout(typeWrite, SPEED)
   } else {
+    sendContainer.value!.classList.add('send-animation')
     setTimeout(endType, 500)
   }
 }
 </script>
 
 <template>
-  <div class="input-container">
+  <div id="send-container" class="input-container">
     <div>
       <span id="chat-input" />
       &nbsp;
@@ -62,5 +69,21 @@ const typeWrite = () => {
   border-radius: 5px;
   background-color: var(--vt-c-black-mute);
   columns: black;
+}
+
+.send-animation {
+  animation: send 500ms forwards;
+}
+
+@keyframes send {
+  0% {
+    background-color: var(--vt-c-black-mute);
+  }
+  50% {
+    background-color: rgb(94, 94, 94);
+  }
+  100% {
+    background-color: var(--vt-c-black-mute);
+  }
 }
 </style>
