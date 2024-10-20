@@ -7,6 +7,7 @@ import ChoicesComponent from '../choices/ChoicesComponent.vue'
 import AnsweringLoader from '../common/loader/AnsweringLoader.vue'
 import { StoryService } from '@/services/storyService'
 import TypeWriter from '../typeWriter/TypeWriter.vue'
+import ButtonComponent from '../common/button/ButtonComponent.vue'
 
 const props = defineProps<{
   story: Story
@@ -34,9 +35,23 @@ const choices = computed(() => {
 })
 
 onMounted(() => {
-  //setting the first item selected => story start
-  addItem(props.story.items.find(e => e.id === 'start') ?? props.story.items[0])
+  const savedItems = retrieveSavedItems()
+  if (savedItems) {
+    savedItems.forEach(e => addItem(e, false))
+    handleAutoText(lastItem.value!)
+  } else
+    addItem(
+      props.story.items.find(e => e.id === 'start') ?? props.story.items[0],
+    )
 })
+
+const retrieveSavedItems = () => {
+  const savedStoryItemsId = localStorage.getItem(`save-${props.story.title}`)
+  const savedItems = props.story.items.filter(e =>
+    savedStoryItemsId?.includes(e.id),
+  )
+  return savedItems
+}
 
 const getItemPosition = (storyItem: StoryItem): 'left' | 'right' => {
   if (storyItem.nodeType === 'CHOICE') return 'right'
@@ -47,9 +62,10 @@ const selectItem = (item: StoryItem) => {
   userAnsweringItem.value = item
 }
 
-const addItem = (item: StoryItem) => {
+const addItem = (item: StoryItem, autoText: boolean = true) => {
   storyItems.value?.push(item)
-  handleAutoText(item)
+  if (autoText) handleAutoText(item)
+  saveProgression()
 }
 
 const userEndedAnswering = () => {
@@ -105,10 +121,24 @@ const scrollToBottom = () => {
       behavior: 'smooth',
     })
 }
+
+const saveProgression = () => {
+  if (!lastItem.value)
+    throw Error(
+      "Technical Error: can't save progression, could not retrieve the last text",
+    )
+  localStorage.setItem(
+    `save-${props.story.title}`,
+    storyItems.value.map(e => e.id).join(','),
+  )
+}
+
+const removeSave = () => localStorage.removeItem(`save-${props.story.title}`)
 </script>
 
 <template>
   <div class="views">
+    <ButtonComponent @click="removeSave"> reset save </ButtonComponent>
     <div class="container choices">
       <ChoicesComponent
         :choices="choices"
