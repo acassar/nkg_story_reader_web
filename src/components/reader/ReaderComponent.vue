@@ -182,7 +182,7 @@ const scrollToBottom = () => {
 
 @media screen and (max-width: 800px) {
   .views {
-    flex-direction: column-reverse;
+    flex-direction: column;
     height: var(--app-available-height-mobile);
     font-size: small;
   }
@@ -193,10 +193,14 @@ const scrollToBottom = () => {
 
   .chat {
     flex: 1;
+    transition: height 1s ease-out;
+    order: 1;
+    height: calc-size(auto);
   }
 
   .choices {
     flex: 0;
+    order: 2;
   }
 }
 </style>
