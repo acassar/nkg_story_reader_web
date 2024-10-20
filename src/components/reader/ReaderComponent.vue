@@ -145,14 +145,16 @@ const scrollToBottom = () => {
   display: flex;
   flex-direction: row;
   overflow: hidden;
-  max-height: var(--app-available-height);
+  height: var(--app-available-height);
 }
 
 .chat {
   background-color: var(--vt-c-black-soft);
   border-radius: 0.5rem;
   flex: 2;
-  height: var(--app-available-height);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .choices {
@@ -162,8 +164,8 @@ const scrollToBottom = () => {
 .bubble-container {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  overflow-y: scroll;
+  flex-grow: 1;
+  overflow-y: auto;
   padding-bottom: 30px;
 }
 
@@ -190,7 +192,6 @@ const scrollToBottom = () => {
   }
 
   .chat {
-    height: 0;
     flex: 1;
   }
 
