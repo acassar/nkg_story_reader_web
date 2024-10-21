@@ -36,7 +36,7 @@ const choices = computed(() => {
 
 onMounted(() => {
   const savedItems = retrieveSavedItems()
-  if (savedItems) {
+  if (savedItems.length) {
     savedItems.forEach(e => addItem(e, false))
     handleAutoText(lastItem.value!)
   } else
