@@ -13,6 +13,7 @@ import {
   retrieveSavedItems,
   saveProgression,
 } from '@/services/saveService'
+import SettingsComponent from '../settings/SettingsComponent.vue'
 
 const props = defineProps<{
   story: Story
@@ -22,6 +23,7 @@ const { getChildren } = StoryService(props.story)
 const storyItems = ref<StoryItem[]>([])
 const isCharacterAnswering = ref<boolean>(false)
 const userAnsweringItem = ref<StoryItem>()
+const showSettings = ref<boolean>(false)
 
 const lastItem = computed(() =>
   (storyItems.value?.length ?? 0) > 0
@@ -98,21 +100,30 @@ const scrollToBottom = () => {
       behavior: 'smooth',
     })
 }
+
+const toggleSettings = () => {
+  showSettings.value = !showSettings.value
+}
 </script>
 
 <template>
   <div class="views">
-    <ButtonComponent @click="() => removeSave(story)">
-      reset save
-    </ButtonComponent>
     <div class="container choices">
       <ChoicesComponent
+        v-if="!showSettings"
         :choices="choices"
         @select-item="selectItem"
-      ></ChoicesComponent>
+      />
+      <SettingsComponent v-else :story />
     </div>
     <div class="container chat">
       <div id="chat-component" class="bubble-container">
+        <v-icon
+          @click="toggleSettings"
+          scale="1.5"
+          id="settings-gear"
+          name="bi-gear-fill"
+        />
         <ChatBubble
           :position="getItemPosition(item)"
           :story-item="item"
@@ -151,6 +162,7 @@ const scrollToBottom = () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 .choices {
@@ -174,6 +186,13 @@ const scrollToBottom = () => {
   color: var(--vt-c-white-soft);
   font-size: 1.2rem;
   padding: 10px;
+}
+
+#settings-gear {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  cursor: pointer;
 }
 
 @media screen and (max-width: 800px) {
