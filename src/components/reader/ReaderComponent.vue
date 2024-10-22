@@ -109,12 +109,8 @@ const toggleSettings = () => {
 <template>
   <div class="views">
     <div class="container choices">
-      <ChoicesComponent
-        v-if="!showSettings"
-        :choices="choices"
-        @select-item="selectItem"
-      />
-      <SettingsComponent v-else :story />
+      <ChoicesComponent :choices="choices" @select-item="selectItem" />
+      <SettingsComponent v-model="showSettings" :story />
     </div>
     <div class="container chat">
       <div id="chat-component" class="bubble-container">
@@ -191,7 +187,7 @@ const toggleSettings = () => {
 #settings-gear {
   position: absolute;
   top: 10px;
-  left: 10px;
+  right: 10px;
   cursor: pointer;
 }
 
