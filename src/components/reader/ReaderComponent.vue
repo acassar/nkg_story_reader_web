@@ -8,6 +8,7 @@ import AnsweringLoader from '../common/loader/AnsweringLoader.vue'
 import { StoryService } from '@/services/storyService'
 import TypeWriter from '../typeWriter/TypeWriter.vue'
 import ButtonComponent from '../common/button/ButtonComponent.vue'
+import { retrieveSavedItems, saveProgression } from '@/services/saveService'
 
 const props = defineProps<{
   story: Story
@@ -35,7 +36,7 @@ const choices = computed(() => {
 })
 
 onMounted(() => {
-  const savedItems = retrieveSavedItems()
+  const savedItems = retrieveSavedItems(props.story)
   if (savedItems.length) {
     savedItems.forEach(e => addItem(e, false))
     handleAutoText(lastItem.value!)
@@ -44,14 +45,6 @@ onMounted(() => {
       props.story.items.find(e => e.id === 'start') ?? props.story.items[0],
     )
 })
-
-const retrieveSavedItems = () => {
-  const savedStoryItemsId = localStorage.getItem(`save-${props.story.title}`)
-  const savedItems = props.story.items.filter(e =>
-    savedStoryItemsId?.includes(e.id),
-  )
-  return savedItems
-}
 
 const getItemPosition = (storyItem: StoryItem): 'left' | 'right' => {
   if (storyItem.nodeType === 'CHOICE') return 'right'
@@ -65,7 +58,7 @@ const selectItem = (item: StoryItem) => {
 const addItem = (item: StoryItem, autoText: boolean = true) => {
   storyItems.value?.push(item)
   if (autoText) handleAutoText(item)
-  saveProgression()
+  saveProgression(props.story, storyItems.value)
 }
 
 const userEndedAnswering = () => {
@@ -120,17 +113,6 @@ const scrollToBottom = () => {
       top: chatElement.scrollHeight,
       behavior: 'smooth',
     })
-}
-
-const saveProgression = () => {
-  if (!lastItem.value)
-    throw Error(
-      "Technical Error: can't save progression, could not retrieve the last text",
-    )
-  localStorage.setItem(
-    `save-${props.story.title}`,
-    storyItems.value.map(e => e.id).join(','),
-  )
 }
 
 const removeSave = () => localStorage.removeItem(`save-${props.story.title}`)
