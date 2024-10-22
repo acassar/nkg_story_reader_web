@@ -20,3 +20,6 @@ export const saveProgression = (
     playedItems.map(e => e.id).join(','),
   )
 }
+
+export const removeSave = (story: Story) =>
+  localStorage.removeItem(`save-${story.title}`)

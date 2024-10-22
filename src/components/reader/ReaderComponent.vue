@@ -5,10 +5,14 @@ import { Story } from '@/class/StoryClass'
 import { StoryItem } from '@/class/StoryItem'
 import ChoicesComponent from '../choices/ChoicesComponent.vue'
 import AnsweringLoader from '../common/loader/AnsweringLoader.vue'
-import { StoryService } from '@/services/storyService'
+import { getTextWritingSpeed, StoryService } from '@/services/storyService'
 import TypeWriter from '../typeWriter/TypeWriter.vue'
 import ButtonComponent from '../common/button/ButtonComponent.vue'
-import { retrieveSavedItems, saveProgression } from '@/services/saveService'
+import {
+  removeSave,
+  retrieveSavedItems,
+  saveProgression,
+} from '@/services/saveService'
 
 const props = defineProps<{
   story: Story
@@ -86,26 +90,6 @@ const handleAutoText = async (item: StoryItem) => {
   scrollToBottom()
 }
 
-/**
- * Calculates the writing speed for the given story item.
- * @param {StoryItem} storyItem - The story item for which the writing speed needs to be calculated.
- * @returns {number} - The calculated writing speed in milliseconds.
- */
-const getTextWritingSpeed = (storyItem: StoryItem) => {
-  const MINIMUM_WRITING_SPEED = 1000
-  const MAXIMUM_WRITING_SPEED = 10000
-  const WORD_PER_SECOND_SPEED = 8
-  const words = storyItem.text.split(' ')
-  const speed = Math.max(
-    Math.min(
-      (words.length / WORD_PER_SECOND_SPEED) * 1000,
-      MINIMUM_WRITING_SPEED,
-    ),
-    MAXIMUM_WRITING_SPEED,
-  )
-  return speed
-}
-
 const scrollToBottom = () => {
   const chatElement = document.getElementById('chat-component')
   if (chatElement)
@@ -114,13 +98,13 @@ const scrollToBottom = () => {
       behavior: 'smooth',
     })
 }
-
-const removeSave = () => localStorage.removeItem(`save-${props.story.title}`)
 </script>
 
 <template>
   <div class="views">
-    <ButtonComponent @click="removeSave"> reset save </ButtonComponent>
+    <ButtonComponent @click="() => removeSave(story)">
+      reset save
+    </ButtonComponent>
     <div class="container choices">
       <ChoicesComponent
         :choices="choices"
