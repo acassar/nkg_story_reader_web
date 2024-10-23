@@ -7,13 +7,9 @@ import ChoicesComponent from '../choices/ChoicesComponent.vue'
 import AnsweringLoader from '../common/loader/AnsweringLoader.vue'
 import { getTextWritingSpeed, StoryService } from '@/services/storyService'
 import TypeWriter from '../typeWriter/TypeWriter.vue'
-import ButtonComponent from '../common/button/ButtonComponent.vue'
-import {
-  removeSave,
-  retrieveSavedItems,
-  saveProgression,
-} from '@/services/saveService'
+import { retrieveSavedItems, saveProgression } from '@/services/saveService'
 import SettingsComponent from '../settings/SettingsComponent.vue'
+import { useStoryLock } from '@/composables/useStoryLock'
 
 const props = defineProps<{
   story: Story
@@ -24,6 +20,12 @@ const storyItems = ref<StoryItem[]>([])
 const isCharacterAnswering = ref<boolean>(false)
 const userAnsweringItem = ref<StoryItem>()
 const showSettings = ref<boolean>(false)
+const {
+  syncLocalStorageLock,
+  lockStoryIfNecessary,
+  unlockStory,
+  isStoryLocked,
+} = useStoryLock(props.story)
 
 const lastItem = computed(() =>
   (storyItems.value?.length ?? 0) > 0
@@ -43,13 +45,21 @@ const choices = computed(() => {
 
 onMounted(() => {
   const savedItems = retrieveSavedItems(props.story)
+  const lockTime = syncLocalStorageLock()
+
+  //Adding the first item, or the saved ones
   if (savedItems.length) {
-    savedItems.forEach(e => addItem(e, false))
-    handleAutoText(lastItem.value!)
-  } else
+    savedItems.forEach(e => addItem(e, true))
+  } else {
     addItem(
       props.story.items.find(e => e.id === 'start') ?? props.story.items[0],
     )
+  }
+
+  //continuing the story only after the lock time (if there) has elapsed
+  setTimeout(() => {
+    handleAutoText(lastItem.value!, true)
+  }, lockTime)
 })
 
 const getItemPosition = (storyItem: StoryItem): 'left' | 'right' => {
@@ -61,9 +71,9 @@ const selectItem = (item: StoryItem) => {
   userAnsweringItem.value = item
 }
 
-const addItem = (item: StoryItem, autoText: boolean = true) => {
+const addItem = (item: StoryItem, mountedCall: boolean = false) => {
   storyItems.value?.push(item)
-  if (autoText) handleAutoText(item)
+  if (!mountedCall) handleAutoText(item)
   saveProgression(props.story, storyItems.value)
 }
 
@@ -79,14 +89,29 @@ const userEndedAnswering = () => {
  * @param {StoryItem} item - The story item for which the text needs to be generated.
  * @returns {Promise<void>} - A Promise that resolves when the text generation is complete.
  */
-const handleAutoText = async (item: StoryItem) => {
+const handleAutoText = async (
+  item: StoryItem,
+  mountedCall: boolean = false,
+) => {
   const children = getChildren(item)
-  if (children?.length === 1 && children[0].nodeType === 'TEXT') {
+  const firstChild = children[0]
+
+  const characterAnswer = () => {
     isCharacterAnswering.value = true
     setTimeout(() => {
       isCharacterAnswering.value = false
-      addItem(children.pop()!)
-    }, getTextWritingSpeed(children[0]))
+      addItem(firstChild)
+    }, getTextWritingSpeed(firstChild))
+  }
+
+  if (children?.length === 1 && firstChild.nodeType === 'TEXT') {
+    let timer = lockStoryIfNecessary(firstChild)
+    if (mountedCall) timer = 0 //if we arrive here by the onMounted event, we don't want to re-run a timer on an already handled item
+    console.log(timer)
+    setTimeout(() => {
+      unlockStory()
+      characterAnswer()
+    }, timer)
   }
   await nextTick()
   scrollToBottom()
@@ -129,6 +154,7 @@ const toggleSettings = () => {
         />
         <AnsweringLoader v-if="isCharacterAnswering" />
       </div>
+      <div v-if="isStoryLocked">Pierre est occupé</div>
       <TypeWriter
         @typing:end="userEndedAnswering"
         :text="userAnsweringItem?.text"
