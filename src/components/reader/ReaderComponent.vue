@@ -49,7 +49,7 @@ onMounted(() => {
 
   //Adding the first item, or the saved ones
   if (savedItems.length) {
-    savedItems.forEach(e => addItem(e, true))
+    savedItems.forEach(e => addItem(e))
   } else {
     addItem(
       props.story.items.find(e => e.id === 'start') ?? props.story.items[0],
@@ -71,9 +71,8 @@ const selectItem = (item: StoryItem) => {
   userAnsweringItem.value = item
 }
 
-const addItem = (item: StoryItem, mountedCall: boolean = false) => {
+const addItem = (item: StoryItem) => {
   storyItems.value?.push(item)
-  if (!mountedCall) handleAutoText(item)
   saveProgression(props.story, storyItems.value)
 }
 
@@ -81,7 +80,17 @@ const userEndedAnswering = () => {
   if (!userAnsweringItem.value)
     throw Error('Technical error: user typing item not available')
   addItem(userAnsweringItem.value)
-  userAnsweringItem.value = undefined
+  const children = getChildren(userAnsweringItem.value)
+
+  if (children.length) {
+    const timer = lockStoryIfNecessary(children[0])
+    setTimeout(() => {
+      if (!userAnsweringItem.value)
+        throw Error('Technical error: user typing item not available')
+      handleAutoText(userAnsweringItem.value)
+      userAnsweringItem.value = undefined
+    }, timer)
+  }
 }
 
 /**
@@ -101,6 +110,7 @@ const handleAutoText = async (
     setTimeout(() => {
       isCharacterAnswering.value = false
       addItem(firstChild)
+      handleAutoText(firstChild)
     }, getTextWritingSpeed(firstChild))
   }
 
