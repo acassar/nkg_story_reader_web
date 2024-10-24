@@ -10,6 +10,7 @@ import TypeWriter from '../typeWriter/TypeWriter.vue'
 import { retrieveSavedItems, saveProgression } from '@/services/saveService'
 import SettingsComponent from '../settings/SettingsComponent.vue'
 import { useStoryLock } from '@/composables/useStoryLock'
+import { notificationService } from '@/services/notificationService'
 
 const props = defineProps<{
   story: Story
@@ -19,13 +20,12 @@ const { getChildren } = StoryService(props.story)
 const storyItems = ref<StoryItem[]>([])
 const isCharacterAnswering = ref<boolean>(false)
 const userAnsweringItem = ref<StoryItem>()
+const lockTimer = ref<number>(0)
 const showSettings = ref<boolean>(false)
-const {
-  syncLocalStorageLock,
-  lockStoryIfNecessary,
-  unlockStory,
-  isStoryLocked,
-} = useStoryLock(props.story)
+
+const { syncLocalStorageLock, isStoryLocked, setUnlockTimeout } = useStoryLock(
+  props.story,
+)
 
 const lastItem = computed(() =>
   (storyItems.value?.length ?? 0) > 0
@@ -39,13 +39,15 @@ const lastItemChildren = computed<StoryItem[]>(() => {
 })
 
 const choices = computed(() => {
-  if (!lastItem.value || userAnsweringItem.value) return []
+  if (!lastItem.value || userAnsweringItem.value || isStoryLocked.value)
+    return []
   return lastItemChildren.value.filter(e => e.nodeType === 'CHOICE')
 })
 
 onMounted(() => {
+  notificationService.requestPermission()
   const savedItems = retrieveSavedItems(props.story)
-  const lockTime = syncLocalStorageLock()
+  lockTimer.value = syncLocalStorageLock()
 
   //Adding the first item, or the saved ones
   if (savedItems.length) {
@@ -56,10 +58,14 @@ onMounted(() => {
     )
   }
 
-  //continuing the story only after the lock time (if there) has elapsed
-  setTimeout(() => {
+  if (lockTimer.value) {
+    //if the story is locked, we need to wait for the lock to be over before continuing
+    setUnlockTimeout(lastItem.value!, () => {
+      handleAutoText(lastItem.value!, true)
+    })
+  } else {
     handleAutoText(lastItem.value!, true)
-  }, lockTime)
+  }
 })
 
 const getItemPosition = (storyItem: StoryItem): 'left' | 'right' => {
@@ -82,14 +88,15 @@ const userEndedAnswering = () => {
   addItem(userAnsweringItem.value)
   const children = getChildren(userAnsweringItem.value)
 
+  const afterTimeout = () => {
+    if (!userAnsweringItem.value)
+      throw Error('Technical error: user typing item not available')
+    handleAutoText(userAnsweringItem.value)
+    userAnsweringItem.value = undefined
+  }
+
   if (children.length) {
-    const timer = lockStoryIfNecessary(children[0])
-    setTimeout(() => {
-      if (!userAnsweringItem.value)
-        throw Error('Technical error: user typing item not available')
-      handleAutoText(userAnsweringItem.value)
-      userAnsweringItem.value = undefined
-    }, timer)
+    lockTimer.value = setUnlockTimeout(children[0], afterTimeout)
   }
 }
 
@@ -115,13 +122,11 @@ const handleAutoText = async (
   }
 
   if (children?.length === 1 && firstChild.nodeType === 'TEXT') {
-    let timer = lockStoryIfNecessary(firstChild)
-    if (mountedCall) timer = 0 //if we arrive here by the onMounted event, we don't want to re-run a timer on an already handled item
-    console.log(timer)
-    setTimeout(() => {
-      unlockStory()
-      characterAnswer()
-    }, timer)
+    if (!mountedCall) {
+      //if we arrive here by the onMounted event, we don't want to re-run a timer on an already handled item
+      lockTimer.value = setUnlockTimeout(firstChild, characterAnswer)
+    } else characterAnswer()
+    console.log(lockTimer.value)
   }
   await nextTick()
   scrollToBottom()
@@ -143,10 +148,6 @@ const toggleSettings = () => {
 
 <template>
   <div class="views">
-    <div class="container choices">
-      <ChoicesComponent :choices="choices" @select-item="selectItem" />
-      <SettingsComponent v-model="showSettings" :story />
-    </div>
     <div class="container chat">
       <div id="chat-component" class="bubble-container">
         <v-icon
@@ -164,11 +165,17 @@ const toggleSettings = () => {
         />
         <AnsweringLoader v-if="isCharacterAnswering" />
       </div>
-      <div v-if="isStoryLocked">Pierre est occupé</div>
+      <div v-if="isStoryLocked">
+        Pierre est occupé {{ lockTimer / 1000 }} secondes
+      </div>
       <TypeWriter
         @typing:end="userEndedAnswering"
         :text="userAnsweringItem?.text"
       ></TypeWriter>
+    </div>
+    <div class="container choices">
+      <ChoicesComponent :choices="choices" @select-item="selectItem" />
+      <SettingsComponent v-model="showSettings" :story />
     </div>
   </div>
 </template>

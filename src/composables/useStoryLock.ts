@@ -1,8 +1,9 @@
 import type { Story } from '@/class/StoryClass'
 import type { StoryItem } from '@/class/StoryItem'
+import { notificationService } from '@/services/notificationService'
 import { ref } from 'vue'
 
-const TIMER_FACTOR = 0.3
+const TIMER_FACTOR = 0.01
 
 export const useStoryLock = (story: Story) => {
   const isStoryLocked = ref<boolean>(false)
@@ -13,6 +14,13 @@ export const useStoryLock = (story: Story) => {
    * @returns {number | undefined} The unlock date in milliseconds or undefined if no lock is needed.
    */
   const lockStoryIfNecessary = (storyItem: StoryItem): number => {
+    const lockDateString = localStorage.getItem(`unlock-${story.title}`)
+    if (lockDateString) {
+      //We don't want to lock the story if it's already locked
+      const lockDate = new Date(lockDateString)
+      return lockDate.getTime() - new Date().getTime()
+    }
+
     const todayDate = new Date()
     if (storyItem.minutesToWait) {
       const unlockDate = new Date(
@@ -53,16 +61,29 @@ export const useStoryLock = (story: Story) => {
     removeLockToLocalStorage()
   }
 
-  const lockStory = () => {
-    isStoryLocked.value = true
+  /**
+   * Sets a timeout to unlock the story item after the minutesToWait has passed.
+   * @param {StoryItem} storyItem - The story item to set the unlock timeout for.
+   * @param {Function} callback - The callback function to execute after the lock time has passed.
+   */
+  const setUnlockTimeout = (storyItem: StoryItem, callback: () => void) => {
+    const lockTime = lockStoryIfNecessary(storyItem)
+    setTimeout(() => {
+      if (lockTime) {
+        notificationService.sendNotification('Pierre est de nouveau en ligne')
+        unlockStory()
+      }
+      callback()
+    }, lockTime)
+    return lockTime
   }
 
   return {
     lockStoryIfNecessary,
     syncLocalStorageLock,
     removeLockToLocalStorage,
-    lockStory,
     unlockStory,
     isStoryLocked,
+    setUnlockTimeout,
   }
 }
