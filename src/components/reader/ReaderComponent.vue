@@ -45,92 +45,107 @@ const choices = computed(() => {
 })
 
 onMounted(() => {
-  notificationService.requestPermission()
-  const savedItems = retrieveSavedItems(props.story)
-  lockTimer.value = syncLocalStorageLock()
+  notificationService.requestPermission() //TODO: make a better way to ask for permission
+  initSavedOrFirstItem()
+})
 
-  //Adding the first item, or the saved ones
+const initSavedOrFirstItem = () => {
+  const savedItems = retrieveSavedItems(props.story)
+
   if (savedItems.length) {
+    //If there are saved items, we need to load them
     savedItems.forEach(e => addItem(e))
   } else {
+    //If there are no saved items, we need to start the story
     addItem(
       props.story.items.find(e => e.id === 'start') ?? props.story.items[0],
     )
   }
 
+  if (!lastItem.value)
+    throw Error('Technical error: Story initialization failed')
+  lockTimer.value = syncLocalStorageLock()
+  const children = getChildren(lastItem.value)
   if (lockTimer.value) {
-    //if the story is locked, we need to wait for the lock to be over before continuing
+    //if the story is locked, we need to wait for the lock to be over before continuing.
+    //It also means that only one child should exist, otherwise it would be a bug
+    if (children.length !== 1)
+      throw Error(
+        'Technical error: locked story with multiple children not handled',
+      )
     setUnlockTimeout(lastItem.value!, () => {
-      handleAutoText(lastItem.value!, true)
+      handleWhoIsAnswering(children[0])
     })
   } else {
-    handleAutoText(lastItem.value!, true)
+    /* If the story is not locked, it might means:
+    - it's a fresh start
+    - story items were saved, but the lock is over
+    */
+    //In either cases, we need to see if there is 1 or more children to handle
+    if (children.length === 1) {
+      //If there is only one child, we can handle it right away
+      handleWhoIsAnswering(children[0])
+    } else {
+      //If there are multiple children, we need to wait for the user to select one
+      //This is the case when the user is presented with multiple choices
+      //We don't need to do anything, the user will select one
+      //Except if the children types are not choices, then it's a bug
+      if (children.some(e => e.nodeType !== 'CHOICE'))
+        throw Error(
+          'Technical error: multiple children of type different that CHOICE not handled',
+        )
+    }
   }
-})
+}
 
 const getItemPosition = (storyItem: StoryItem): 'left' | 'right' => {
   if (storyItem.nodeType === 'CHOICE') return 'right'
   return 'left'
 }
 
-const selectItem = (item: StoryItem) => {
-  userAnsweringItem.value = item
-}
-
 const addItem = (item: StoryItem) => {
   storyItems.value?.push(item)
   props.story.addStoryConditionActivated(item)
-  saveProgression(props.story, storyItems.value)
+  saveProgression(props.story, storyItems.value) //TODO : maybe don't save with mounted call
 }
 
 const userEndedAnswering = () => {
   if (!userAnsweringItem.value)
     throw Error('Technical error: user typing item not available')
   addItem(userAnsweringItem.value)
-  const children = getChildren(userAnsweringItem.value)
+  storyItemAddedCallback(userAnsweringItem.value)
+  userAnsweringItem.value = undefined
+}
 
-  const afterTimeout = () => {
-    if (!userAnsweringItem.value)
-      throw Error('Technical error: user typing item not available')
-    handleAutoText(userAnsweringItem.value)
-    userAnsweringItem.value = undefined
-  }
+const handleWhoIsAnswering = (item: StoryItem) => {
+  if (item.nodeType === 'TEXT') makeCharacterAnswer(item)
+  else if (item.nodeType === 'CHOICE') makeUserAnswer(item)
+}
 
-  if (children.length) {
-    lockTimer.value = setUnlockTimeout(children[0], afterTimeout)
+const storyItemAddedCallback = (storyItem: StoryItem) => {
+  const children = getChildren(storyItem)
+  if (children.length === 1) {
+    const onlyChild = children[0]
+    lockTimer.value = setUnlockTimeout(onlyChild, () => {
+      handleWhoIsAnswering(onlyChild)
+    })
   }
 }
 
-/**
- * Handles the automatic text generation for a given story item. It keeps displaying the character texts.
- * @param {StoryItem} item - The story item for which the text needs to be generated.
- * @returns {Promise<void>} - A Promise that resolves when the text generation is complete.
- */
-const handleAutoText = async (
-  item: StoryItem,
-  mountedCall: boolean = false,
-) => {
-  const children = getChildren(item)
-  const firstChild = children[0]
+const makeUserAnswer = (item: StoryItem) => {
+  userAnsweringItem.value = item
+}
 
-  const characterAnswer = () => {
-    isCharacterAnswering.value = true
-    setTimeout(() => {
-      isCharacterAnswering.value = false
-      addItem(firstChild)
-      handleAutoText(firstChild)
-    }, getTextWritingSpeed(firstChild))
-  }
-
-  if (children?.length === 1 && firstChild.nodeType === 'TEXT') {
-    if (!mountedCall) {
-      //if we arrive here by the onMounted event, we don't want to re-run a timer on an already handled item
-      lockTimer.value = setUnlockTimeout(firstChild, characterAnswer)
-    } else characterAnswer()
-    console.log(lockTimer.value)
-  }
-  await nextTick()
-  scrollToBottom()
+const makeCharacterAnswer = (item: StoryItem) => {
+  //TODO: the time is oddly long for short texts
+  isCharacterAnswering.value = true
+  setTimeout(async () => {
+    isCharacterAnswering.value = false
+    addItem(item)
+    storyItemAddedCallback(item)
+    await nextTick()
+    scrollToBottom()
+  }, getTextWritingSpeed(item))
 }
 
 const scrollToBottom = () => {
@@ -178,7 +193,7 @@ const toggleSettings = () => {
       <ChoicesComponent
         :story="story"
         :choices="choices"
-        @select-item="selectItem"
+        @select-item="makeUserAnswer"
       />
       <SettingsComponent v-model="showSettings" :story />
     </div>
