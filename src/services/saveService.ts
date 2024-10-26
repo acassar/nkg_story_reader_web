@@ -1,13 +1,20 @@
 import type { Story } from '@/class/StoryClass'
 import type { StoryItem } from '@/class/StoryItem'
 
-const SAVE_PROGRESSION: boolean = false
+const SAVE_PROGRESSION: boolean = true
 
 export const retrieveSavedItems = (story: Story): StoryItem[] => {
   if (!SAVE_PROGRESSION) return []
   const savedStoryItemsId = localStorage.getItem(`save-${story.title}`)
-  const savedItems = story.items.filter(e => savedStoryItemsId?.includes(e.id))
-  return savedItems
+  const savedItems = savedStoryItemsId?.split(',').map(e => {
+    const item = story.items.find(i => i.id === e)
+    if (!item)
+      throw Error(
+        `Technical Error: could not find the saved item with id ${e} in the story ${story.title}`,
+      )
+    return item
+  })
+  return savedItems ?? []
 }
 
 export const saveProgression = (
