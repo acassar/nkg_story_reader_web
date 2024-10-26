@@ -3,16 +3,16 @@ import type { Story } from './StoryClass'
 export type NodeType = 'BAD' | 'GOOD' | 'TEXT' | 'CHOICE'
 
 export class ConditionalActivation {
-  activatedByKey: string
-  activatedByValue: string
-  activateKey: string
-  activateValue: string
+  activatedByKey: string | undefined
+  activatedByValue: string | undefined
+  activateKey: string | undefined
+  activateValue: string | undefined
 
   constructor(
-    activatedByKey: string,
-    activatedByValue: string,
-    activateKey: string,
-    activateValue: string,
+    activatedByKey: string | undefined,
+    activatedByValue: string | undefined,
+    activateKey: string | undefined,
+    activateValue: string | undefined,
   ) {
     this.activatedByKey = activatedByKey
     this.activatedByValue = activatedByValue
@@ -41,26 +41,6 @@ export class StoryItem {
     this.nodeType = nodeType
     this.minutesToWait = minutesToWait
     this.conditionalActivation = conditionalActivation
-  }
-
-  static createFromForm({
-    id,
-    text,
-    minutesDelay,
-    nodeType,
-  }: {
-    id: string
-    text: string
-    minutesDelay: string
-    nodeType: string
-  }): StoryItem {
-    return new StoryItem(
-      id,
-      text,
-      this.stringToNodeType(nodeType),
-      parseInt(minutesDelay),
-      new ConditionalActivation('', '', '', ''),
-    )
   }
 
   static stringToNodeType(type: string): NodeType {
@@ -94,17 +74,23 @@ export class StoryItem {
   }
 
   hasCondition(): boolean {
-    return this.conditionalActivation?.activatedByKey != ''
+    return (
+      !!this.conditionalActivation?.activatedByKey &&
+      !!this.conditionalActivation?.activatedByValue
+    )
   }
 
   hasActivation(): boolean {
-    return this.conditionalActivation?.activateKey != ''
+    return (
+      !!this.conditionalActivation?.activateKey &&
+      !!this.conditionalActivation?.activateValue
+    )
   }
 
   isSelectable(story: Story): boolean {
     if (this.hasCondition()) {
       return (
-        story.conditions[this.conditionalActivation!.activatedByKey] ==
+        story.conditions[this.conditionalActivation!.activatedByKey!] ==
         this.conditionalActivation!.activatedByValue
       )
     }

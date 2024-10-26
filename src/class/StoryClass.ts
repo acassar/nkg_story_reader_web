@@ -7,7 +7,7 @@ export class Story {
   title: string
   items: StoryItem[] = []
   edges: StoryEdge[] = []
-  conditions: { [key: string]: string } = {}
+  conditions: Record<string, string> = {}
 
   constructor(title: string, data: JsonObject) {
     this.title = title
@@ -27,17 +27,29 @@ export class Story {
     return StoryItem.stringToNodeType(nodeType)
   }
 
+  addStoryConditionActivated(storyitem: StoryItem): void {
+    if (
+      storyitem.hasActivation() &&
+      storyitem.conditionalActivation?.activateKey
+    ) {
+      this.conditions[storyitem.conditionalActivation!.activateKey!] =
+        storyitem.conditionalActivation!.activateValue!
+    }
+  }
+
   convertToStoryItem(data: JsonObject): StoryItem {
-    const conditionalActivation = data['conditional_activation'] as JsonObject
+    const conditionalActivation = data['conditional_activation'] as
+      | JsonObject
+      | undefined
     let conditionalActivationObject: ConditionalActivation | undefined
-    if (conditionalActivation)
+    if (conditionalActivation) {
       conditionalActivationObject = new ConditionalActivation(
-        (conditionalActivation['activated_by_key'] as string | undefined) ?? '',
-        (conditionalActivation['activated_by_value'] as string | undefined) ??
-          '',
-        (conditionalActivation['activate_key'] as string | undefined) ?? '',
-        (conditionalActivation['activate_value'] as string | undefined) ?? '',
+        conditionalActivation['activated_by_key'] as string | undefined,
+        conditionalActivation['activated_by_value'] as string | undefined,
+        conditionalActivation['activate_key'] as string | undefined,
+        conditionalActivation['activate_value'] as string | undefined,
       )
+    }
 
     return new StoryItem(
       data['id'] as string,

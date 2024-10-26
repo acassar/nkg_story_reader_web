@@ -79,6 +79,7 @@ const selectItem = (item: StoryItem) => {
 
 const addItem = (item: StoryItem) => {
   storyItems.value?.push(item)
+  props.story.addStoryConditionActivated(item)
   saveProgression(props.story, storyItems.value)
 }
 
@@ -174,7 +175,11 @@ const toggleSettings = () => {
       ></TypeWriter>
     </div>
     <div class="container choices">
-      <ChoicesComponent :choices="choices" @select-item="selectItem" />
+      <ChoicesComponent
+        :story="story"
+        :choices="choices"
+        @select-item="selectItem"
+      />
       <SettingsComponent v-model="showSettings" :story />
     </div>
   </div>

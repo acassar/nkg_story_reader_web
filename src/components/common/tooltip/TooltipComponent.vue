@@ -15,7 +15,7 @@ onMounted(() => {
       const parentRect = parent.getBoundingClientRect()
       const tooltipRect = tooltip.getBoundingClientRect()
 
-      if (tooltipRect.top < parentRect.top) {
+      if (tooltipRect.top <= parentRect.top) {
         tooltip.style.top = '100%'
         tooltip.style.left = '50%'
         tooltip.style.transform = 'translateX(-50%)'
