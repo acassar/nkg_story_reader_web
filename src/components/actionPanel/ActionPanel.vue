@@ -45,6 +45,7 @@ defineEmits<{
       :story-item="lastItem"
     />
     <ChoicesComponent
+      v-if="choices"
       :story="story"
       :choices="choices"
       @select-item="item => $emit('makeUserAnswer', item)"
