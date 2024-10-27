@@ -86,8 +86,8 @@ const initSavedOrFirstItem = () => {
     */
     //In either cases, we need to see if there is 1 or more children to handle
     if (children.length === 1) {
-      //If there is only one child, we can handle it right away if it's a text
-      if (children[0].nodeType === 'TEXT') handleWhoIsAnswering(children[0])
+      //If there is only one child, we can handle it right away if it's not a choice
+      if (children[0].nodeType !== 'CHOICE') handleWhoIsAnswering(children[0])
     } else {
       //If there are multiple children, we need to wait for the user to select one
       //This is the case when the user is presented with multiple choices
@@ -148,7 +148,7 @@ const undo = () => {
 
 const storyItemAddedCallback = (storyItem: StoryItem) => {
   const children = getChildren(storyItem)
-  if (children.length === 1 && children[0].nodeType === 'TEXT') {
+  if (children.length === 1 && children[0].nodeType !== 'CHOICE') {
     const onlyChild = children[0]
     lockTimer.value = setUnlockTimeout(onlyChild, () => {
       handleWhoIsAnswering(onlyChild)

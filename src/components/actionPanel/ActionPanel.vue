@@ -39,7 +39,11 @@ defineEmits<{
 
 <template>
   <div class="action-panel-container">
-    <StoryEndComponent :is-open="showEnd" :story-item="lastItem!" />
+    <StoryEndComponent
+      v-if="lastItem"
+      :is-open="showEnd"
+      :story-item="lastItem"
+    />
     <ChoicesComponent
       :story="story"
       :choices="choices"
