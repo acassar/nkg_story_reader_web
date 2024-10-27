@@ -8,7 +8,10 @@ const props = defineProps<{
   story: Story
 }>()
 
-defineEmits<(e: 'selectItem', choice: StoryItem) => void>()
+defineEmits<{
+  (e: 'selectItem', choice: StoryItem): void
+  (e: 'fullyClosed'): void
+}>()
 
 const isDisabled = (choice: StoryItem) => {
   return !choice.isSelectable(props.story)
@@ -16,14 +19,21 @@ const isDisabled = (choice: StoryItem) => {
 </script>
 
 <template>
-  <ButtonComponent
-    :key="choice.id"
-    :disabled="isDisabled(choice)"
-    v-for="choice in choices"
-    @click="$emit('selectItem', choice)"
+  <transition-group
+    @after-leave="() => $emit('fullyClosed')"
+    name="slide-fade"
+    tag="div"
   >
-    <span>{{ choice.text }}</span>
-  </ButtonComponent>
+    <ButtonComponent
+      :key="choice.id"
+      :disabled="isDisabled(choice)"
+      v-for="(choice, index) in choices"
+      @click="$emit('selectItem', choice)"
+      :style="{ transitionDelay: `${index * 0.2}s` }"
+    >
+      <span>{{ choice.text }}</span>
+    </ButtonComponent>
+  </transition-group>
 </template>
 
 <style scoped>
@@ -35,5 +45,15 @@ button {
   button {
     font-size: small;
   }
+}
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 1.5s ease;
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(100px);
+  opacity: 0;
 }
 </style>

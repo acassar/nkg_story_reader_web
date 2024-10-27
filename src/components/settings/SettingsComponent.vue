@@ -5,13 +5,16 @@ import type { Story } from '@/class/StoryClass'
 
 defineProps<{
   story: Story
+  isOpen: boolean
 }>()
 
-const isOpen = defineModel({ required: true })
+defineEmits<{
+  (e: 'fullyClosed'): void
+}>()
 </script>
 
 <template>
-  <transition name="slide">
+  <transition @after-leave="() => $emit('fullyClosed')" name="slide">
     <div v-if="isOpen" class="settings-container">
       <ButtonComponent @click="() => removeSave(story)">
         Effacer la sauvegarde
@@ -24,6 +27,10 @@ const isOpen = defineModel({ required: true })
 .settings-container {
   display: flex;
   flex-direction: column;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background);
 }
 
 .slide-enter-active,

@@ -3,15 +3,13 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import ChatBubble from '../chat/ChatBubble.vue'
 import { Story } from '@/class/StoryClass'
 import { StoryItem } from '@/class/StoryItem'
-import ChoicesComponent from '../choices/ChoicesComponent.vue'
 import AnsweringLoader from '../common/loader/AnsweringLoader.vue'
 import { getTextWritingSpeed, StoryService } from '@/services/storyService'
 import TypeWriter from '../typeWriter/TypeWriter.vue'
 import { retrieveSavedItems, saveProgression } from '@/services/saveService'
-import SettingsComponent from '../settings/SettingsComponent.vue'
 import { useStoryLock } from '@/composables/useStoryLock'
 import { notificationService } from '@/services/notificationService'
-import StoryEndComponent from '../endings/StoryEndComponent.vue'
+import ActionPanel from '../actionPanel/ActionPanel.vue'
 
 const props = defineProps<{
   story: Story
@@ -23,9 +21,20 @@ const isCharacterAnswering = ref<boolean>(false)
 const userAnsweringItem = ref<StoryItem>()
 const lockTimer = ref<number>(0)
 const showSettings = ref<boolean>(false)
+
+const actionPanelFlex = computed(() => (showSettings.value ? 1 : 0))
+
 const showEnd = computed(
   () =>
     lastItem.value?.nodeType === 'BAD' || lastItem.value?.nodeType === 'GOOD',
+)
+
+const choicesHidden = computed<boolean>(
+  () =>
+    !lastItem.value ||
+    !!userAnsweringItem.value ||
+    isStoryLocked.value ||
+    showEnd.value,
 )
 
 const { syncLocalStorageLock, isStoryLocked, setUnlockTimeout } = useStoryLock(
@@ -37,17 +46,6 @@ const lastItem = computed(() =>
     ? storyItems.value![storyItems.value!.length - 1]
     : undefined,
 )
-
-const lastItemChildren = computed<StoryItem[]>(() => {
-  if (!lastItem.value) return []
-  return getChildren(lastItem.value)
-})
-
-const choices = computed(() => {
-  if (!lastItem.value || userAnsweringItem.value || isStoryLocked.value)
-    return []
-  return lastItemChildren.value.filter(e => e.nodeType === 'CHOICE')
-})
 
 onMounted(() => {
   notificationService.requestPermission() //TODO: make a better way to ask for permission
@@ -140,6 +138,7 @@ const undo = () => {
     const newLastItem = lastItem.value
     if (newLastItem && newLastItem.nodeType === 'CHOICE') {
       storyItems.value.pop()
+      saveProgression(props.story, storyItems.value)
     } else {
       // If not, recursively call undo until we find a choice or run out of items
       undo()
@@ -215,14 +214,15 @@ const toggleSettings = () => {
         :text="userAnsweringItem?.text"
       ></TypeWriter>
     </div>
-    <div class="container choices">
-      <StoryEndComponent :story-item="lastItem!" v-model="showEnd" />
-      <ChoicesComponent
+    <div id="action-panel">
+      <ActionPanel
+        :choices-hidden="choicesHidden"
+        v-model:show-end="showEnd"
+        v-model:show-settings="showSettings"
         :story="story"
-        :choices="choices"
-        @select-item="makeUserAnswer"
+        :story-items="storyItems"
+        @make-user-answer="makeUserAnswer"
       />
-      <SettingsComponent v-model="showSettings" :story />
     </div>
   </div>
 </template>
@@ -239,6 +239,7 @@ const toggleSettings = () => {
   flex-direction: row;
   overflow: hidden;
   height: var(--app-available-height);
+  gap: 1rem;
 }
 
 .chat {
@@ -251,7 +252,7 @@ const toggleSettings = () => {
   position: relative;
 }
 
-.choices {
+#action-panel {
   flex: 1;
 }
 
@@ -306,8 +307,8 @@ const toggleSettings = () => {
     height: calc-size(auto);
   }
 
-  .choices {
-    flex: 0;
+  #action-panel {
+    flex: v-bind('actionPanelFlex');
     order: 2;
   }
 }
