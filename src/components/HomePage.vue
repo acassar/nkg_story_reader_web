@@ -13,7 +13,7 @@ onMounted(() => {
 
 const loadStory = async () => {
   try {
-    currentStory.value = new Story('Cave', ExampleStory)
+    currentStory.value = new Story('Example', ExampleStory)
   } catch (error) {
     console.log(error)
   }
