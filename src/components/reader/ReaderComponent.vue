@@ -15,6 +15,8 @@ const props = defineProps<{
   story: Story
 }>()
 
+defineEmits<(e: 'back') => void>()
+
 const { getChildren } = StoryService(props.story)
 const storyItems = ref<StoryItem[]>([])
 const isCharacterAnswering = ref<boolean>(false)
@@ -186,47 +188,61 @@ const toggleSettings = () => {
 </script>
 
 <template>
-  <div class="views">
-    <div class="container chat">
-      <div id="chat-component" class="bubble-container">
-        <v-icon
-          @click="toggleSettings"
-          scale="1.5"
-          id="settings-gear"
-          name="bi-gear-fill"
-        />
-        <v-icon @click="undo" scale="1.5" id="undo-icon" name="la-undo-solid" />
-        <ChatBubble
-          :position="getItemPosition(item)"
-          :story-item="item"
-          :key="index"
-          v-for="(item, index) of storyItems"
-          :class="getItemPosition"
-        />
-        <AnsweringLoader v-if="isCharacterAnswering" />
+  <div id="game-container">
+    <span style="cursor: pointer" @click="$emit('back')">Retour</span>
+    <div class="views">
+      <div class="container chat">
+        <div id="chat-component" class="bubble-container">
+          <v-icon
+            @click="toggleSettings"
+            scale="1.5"
+            id="settings-gear"
+            name="bi-gear-fill"
+          />
+          <v-icon
+            @click="undo"
+            scale="1.5"
+            id="undo-icon"
+            name="la-undo-solid"
+          />
+          <ChatBubble
+            :position="getItemPosition(item)"
+            :story-item="item"
+            :key="index"
+            v-for="(item, index) of storyItems"
+            :class="getItemPosition"
+          />
+          <AnsweringLoader v-if="isCharacterAnswering" />
+        </div>
+        <div v-if="isStoryLocked">
+          Pierre est occupé {{ lockTimer / 1000 }} secondes
+        </div>
+        <TypeWriter
+          @typing:end="userEndedAnswering"
+          :text="userAnsweringItem?.text"
+        ></TypeWriter>
       </div>
-      <div v-if="isStoryLocked">
-        Pierre est occupé {{ lockTimer / 1000 }} secondes
+      <div id="action-panel">
+        <ActionPanel
+          :choices-hidden="choicesHidden"
+          v-model:show-end="showEnd"
+          v-model:show-settings="showSettings"
+          :story="story"
+          :story-items="storyItems"
+          @make-user-answer="makeUserAnswer"
+        />
       </div>
-      <TypeWriter
-        @typing:end="userEndedAnswering"
-        :text="userAnsweringItem?.text"
-      ></TypeWriter>
-    </div>
-    <div id="action-panel">
-      <ActionPanel
-        :choices-hidden="choicesHidden"
-        v-model:show-end="showEnd"
-        v-model:show-settings="showSettings"
-        :story="story"
-        :story-items="storyItems"
-        @make-user-answer="makeUserAnswer"
-      />
     </div>
   </div>
 </template>
 
 <style scoped>
+#game-container {
+  display: flex;
+  flex-direction: column;
+  height: var(--app-available-height);
+}
+
 .container {
   display: flex;
   flex-direction: column;
@@ -237,8 +253,8 @@ const toggleSettings = () => {
   display: flex;
   flex-direction: row;
   overflow: hidden;
-  height: var(--app-available-height);
   gap: 1rem;
+  height: 100%;
 }
 
 .chat {
