@@ -161,7 +161,6 @@ const makeUserAnswer = (item: StoryItem) => {
 }
 
 const makeCharacterAnswer = (item: StoryItem) => {
-  //TODO: the time is oddly long for short texts
   isCharacterAnswering.value = true
   setTimeout(async () => {
     isCharacterAnswering.value = false

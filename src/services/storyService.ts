@@ -20,14 +20,12 @@ export const StoryService = (story: Story) => {
 export const getTextWritingSpeed = (storyItem: StoryItem) => {
   const MINIMUM_WRITING_SPEED = 1000
   const MAXIMUM_WRITING_SPEED = 10000
-  const WORD_PER_SECOND_SPEED = 8
+  const WORD_PER_SECOND_SPEED = 5
   const words = storyItem.text.split(' ')
-  const speed = Math.max(
-    Math.min(
-      (words.length / WORD_PER_SECOND_SPEED) * 1000,
-      MINIMUM_WRITING_SPEED,
-    ),
-    MAXIMUM_WRITING_SPEED,
+  let speed = (words.length / WORD_PER_SECOND_SPEED) * 1000
+  speed = Math.max(
+    MINIMUM_WRITING_SPEED,
+    Math.min(speed, MAXIMUM_WRITING_SPEED),
   )
   return speed
 }
