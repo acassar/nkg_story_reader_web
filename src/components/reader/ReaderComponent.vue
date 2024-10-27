@@ -11,6 +11,7 @@ import { retrieveSavedItems, saveProgression } from '@/services/saveService'
 import SettingsComponent from '../settings/SettingsComponent.vue'
 import { useStoryLock } from '@/composables/useStoryLock'
 import { notificationService } from '@/services/notificationService'
+import StoryEndComponent from '../endings/StoryEndComponent.vue'
 
 const props = defineProps<{
   story: Story
@@ -22,6 +23,10 @@ const isCharacterAnswering = ref<boolean>(false)
 const userAnsweringItem = ref<StoryItem>()
 const lockTimer = ref<number>(0)
 const showSettings = ref<boolean>(false)
+const showEnd = computed(
+  () =>
+    lastItem.value?.nodeType === 'BAD' || lastItem.value?.nodeType === 'GOOD',
+)
 
 const { syncLocalStorageLock, isStoryLocked, setUnlockTimeout } = useStoryLock(
   props.story,
@@ -120,6 +125,26 @@ const userEndedAnswering = () => {
 const handleWhoIsAnswering = (item: StoryItem) => {
   if (item.nodeType === 'TEXT') makeCharacterAnswer(item)
   else if (item.nodeType === 'CHOICE') makeUserAnswer(item)
+  else if (item.nodeType === 'BAD' || item.nodeType == 'GOOD') {
+    addItem(item)
+    storyItemAddedCallback(item)
+  } else throw Error('Technical error: unknown node type')
+}
+
+const undo = () => {
+  if (storyItems.value.length > 1) {
+    // Remove the last item
+    storyItems.value.pop()
+
+    // Check if the new last item is a choice
+    const newLastItem = lastItem.value
+    if (newLastItem && newLastItem.nodeType === 'CHOICE') {
+      storyItems.value.pop()
+    } else {
+      // If not, recursively call undo until we find a choice or run out of items
+      undo()
+    }
+  }
 }
 
 const storyItemAddedCallback = (storyItem: StoryItem) => {
@@ -172,6 +197,7 @@ const toggleSettings = () => {
           id="settings-gear"
           name="bi-gear-fill"
         />
+        <v-icon @click="undo" scale="1.5" id="undo-icon" name="la-undo-solid" />
         <ChatBubble
           :position="getItemPosition(item)"
           :story-item="item"
@@ -190,6 +216,7 @@ const toggleSettings = () => {
       ></TypeWriter>
     </div>
     <div class="container choices">
+      <StoryEndComponent :story-item="lastItem!" v-model="showEnd" />
       <ChoicesComponent
         :story="story"
         :choices="choices"
@@ -251,6 +278,13 @@ const toggleSettings = () => {
   position: absolute;
   top: 10px;
   right: 10px;
+  cursor: pointer;
+}
+
+#undo-icon {
+  position: absolute;
+  top: 10px;
+  left: 10px;
   cursor: pointer;
 }
 
