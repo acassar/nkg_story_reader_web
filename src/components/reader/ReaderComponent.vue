@@ -15,16 +15,16 @@ const props = defineProps<{
   story: Story
 }>()
 
-defineEmits<(e: 'back') => void>()
+const emit = defineEmits<{
+  (e: 'back'): void
+  (e: 'open:settings'): void
+}>()
 
 const { getChildren } = StoryService(props.story)
 const storyItems = ref<StoryItem[]>([])
 const isCharacterAnswering = ref<boolean>(false)
 const userAnsweringItem = ref<StoryItem>()
 const lockTimer = ref<number>(0)
-const showSettings = ref<boolean>(false)
-
-const actionPanelFlex = computed(() => (showSettings.value ? 1 : 0))
 
 const showEnd = computed(
   () =>
@@ -183,7 +183,7 @@ const scrollToBottom = () => {
 }
 
 const toggleSettings = () => {
-  showSettings.value = !showSettings.value
+  emit('open:settings')
 }
 </script>
 
@@ -226,7 +226,6 @@ const toggleSettings = () => {
         <ActionPanel
           :choices-hidden="choicesHidden"
           v-model:show-end="showEnd"
-          v-model:show-settings="showSettings"
           :story="story"
           :story-items="storyItems"
           @make-user-answer="makeUserAnswer"
@@ -323,7 +322,7 @@ const toggleSettings = () => {
   }
 
   #action-panel {
-    flex: v-bind('actionPanelFlex');
+    flex: 0;
     order: 2;
   }
 }

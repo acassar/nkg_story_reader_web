@@ -2,7 +2,6 @@
 import type { Story } from '@/class/StoryClass'
 import ChoicesComponent from '../choices/ChoicesComponent.vue'
 import StoryEndComponent from '../endings/StoryEndComponent.vue'
-import SettingsComponent from '../settings/SettingsComponent.vue'
 import type { StoryItem } from '@/class/StoryItem'
 import { computed } from 'vue'
 import { StoryService } from '@/services/storyService'
@@ -28,7 +27,6 @@ const choices = computed(() => {
 })
 
 const showEnd = defineModel<boolean>('showEnd', { required: true })
-const showSettings = defineModel<boolean>('showSettings', { required: true })
 
 defineEmits<{
   (e: 'makeUserAnswer', item: StoryItem): void
@@ -50,7 +48,6 @@ defineEmits<{
       :choices="choices"
       @select-item="item => $emit('makeUserAnswer', item)"
     />
-    <SettingsComponent :is-open="showSettings" :story />
   </div>
 </template>
 

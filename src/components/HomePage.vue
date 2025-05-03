@@ -5,8 +5,11 @@ import { ref } from 'vue'
 import ExampleStory from '@/stories/example/example.json'
 import ButtonComponent from './common/button/ButtonComponent.vue'
 import CaveStory from '@/stories/cave/cave.json'
+import SettingsComponent from './settings/SettingsComponent.vue'
 
 const currentStory = ref<Story>()
+const showSettings = ref(false)
+
 const stories: { name: string; story: Record<string, unknown> }[] = [
   {
     name: 'Example',
@@ -44,11 +47,19 @@ const loadStory = async (story: {
       {{ story.name }}
     </ButtonComponent>
   </div>
-  <ReaderComponentVue
-    @back="() => (currentStory = undefined)"
-    v-else
-    :story="currentStory"
-  />
+  <div v-else>
+    <SettingsComponent
+      v-if="showSettings"
+      v-model="showSettings"
+      :story="currentStory"
+    />
+    <ReaderComponentVue
+      v-else
+      :story="currentStory"
+      @back="() => (currentStory = undefined)"
+      @open:settings="showSettings = true"
+    />
+  </div>
 </template>
 
 <style scoped>
