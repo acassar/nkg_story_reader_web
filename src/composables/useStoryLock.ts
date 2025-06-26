@@ -1,12 +1,19 @@
 import type { Story } from '@/class/StoryClass'
 import type { StoryItem } from '@/class/StoryItem'
+import {
+  MAX_AWAY_TIME_FACTOR,
+  UNLOCK_STORAGE_KEY,
+} from '@/constants/settings/settingsConstant'
 import { notificationService } from '@/services/notificationService'
+import { applySpeedFactor } from '@/services/storyService'
+import { useSettingsStore } from '@/stores/settings.store'
+import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 
-const TIMER_FACTOR = 0.01
-
 export const useStoryLock = (story: Story) => {
+  const { awayTimeFactor } = storeToRefs(useSettingsStore())
   const isStoryLocked = ref<boolean>(false)
+  const { lockTimeoutCallback } = storeToRefs(useSettingsStore())
 
   /**
    * Locks the story item if it has a minutesToWait value.
@@ -14,7 +21,9 @@ export const useStoryLock = (story: Story) => {
    * @returns {number | undefined} The unlock date in milliseconds or undefined if no lock is needed.
    */
   const lockStoryIfNecessary = (storyItem: StoryItem): number => {
-    const lockDateString = localStorage.getItem(`unlock-${story.title}`)
+    const lockDateString = localStorage.getItem(
+      `${UNLOCK_STORAGE_KEY}-${story.title}`,
+    )
     if (lockDateString) {
       //We don't want to lock the story if it's already locked
       const lockDate = new Date(lockDateString)
@@ -23,11 +32,20 @@ export const useStoryLock = (story: Story) => {
 
     const todayDate = new Date()
     if (storyItem.minutesToWait) {
+      const speedInMS = storyItem.minutesToWait * 1000 * 60
+
       const unlockDate = new Date(
         todayDate.getTime() +
-          storyItem.minutesToWait * 1000 * 60 * TIMER_FACTOR,
+          applySpeedFactor({
+            speed: speedInMS,
+            max: MAX_AWAY_TIME_FACTOR,
+            factor: awayTimeFactor.value,
+          }),
       )
-      localStorage.setItem(`unlock-${story.title}`, unlockDate.toUTCString())
+      localStorage.setItem(
+        `${UNLOCK_STORAGE_KEY}-${story.title}`,
+        unlockDate.toUTCString(),
+      )
       isStoryLocked.value = true
       return unlockDate.getTime() - todayDate.getTime()
     }
@@ -40,7 +58,9 @@ export const useStoryLock = (story: Story) => {
    */
   const syncLocalStorageLock = (): number => {
     let lockTime = 0
-    const lockDateString = localStorage.getItem(`unlock-${story.title}`)
+    const lockDateString = localStorage.getItem(
+      `${UNLOCK_STORAGE_KEY}-${story.title}`,
+    )
     if (lockDateString) {
       const lockDate = new Date(lockDateString)
       if (isNaN(lockDate.getTime())) throw Error('Invalid lock date')
@@ -53,12 +73,13 @@ export const useStoryLock = (story: Story) => {
   }
 
   const removeLockToLocalStorage = () => {
-    localStorage.removeItem(`unlock-${story.title}`)
+    localStorage.removeItem(`${UNLOCK_STORAGE_KEY}-${story.title}`)
   }
 
   const unlockStory = () => {
     isStoryLocked.value = false
     removeLockToLocalStorage()
+    lockTimeoutCallback.value = undefined
   }
 
   /**
@@ -68,13 +89,25 @@ export const useStoryLock = (story: Story) => {
    */
   const setUnlockTimeout = (storyItem: StoryItem, callback: () => void) => {
     const lockTime = lockStoryIfNecessary(storyItem)
-    setTimeout(() => {
-      if (lockTime) {
-        notificationService.sendNotification('Pierre est de nouveau en ligne')
-        unlockStory()
+
+    if (!lockTimeoutCallback.value) {
+      console.info("pas de timeout pour l'instant: création")
+      lockTimeoutCallback.value = () => {
+        //TODO: verifier qu'il ne se declenche pas si ce n'est pas le moment
+        if (lockTimeoutCallback.value) {
+          if (lockTime) {
+            notificationService.sendNotification(
+              'Pierre est de nouveau en ligne',
+            )
+            unlockStory()
+          }
+          callback()
+          lockTimeoutCallback.value = undefined
+        }
       }
-      callback()
-    }, lockTime)
+      setTimeout(lockTimeoutCallback.value, lockTime)
+    } else console.info('timeout déjà présent')
+
     return lockTime
   }
 

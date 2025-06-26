@@ -1,5 +1,11 @@
 import type { Story } from '@/class/StoryClass'
 import type { StoryItem } from '@/class/StoryItem'
+import {
+  SAVE_STORAGE_KEY,
+  UNLOCK_STORAGE_KEY,
+} from '@/constants/settings/settingsConstant'
+import { useSettingsStore } from '@/stores/settings.store'
+import { storeToRefs } from 'pinia'
 
 const SAVE_PROGRESSION: boolean = true
 
@@ -27,10 +33,14 @@ export const saveProgression = (
     )
   if (SAVE_PROGRESSION)
     localStorage.setItem(
-      `save-${story.title}`,
+      `${SAVE_STORAGE_KEY}-${story.title}`,
       playedItems.map(e => e.id).join(','),
     )
 }
 
-export const removeSave = (story: Story) =>
-  localStorage.removeItem(`save-${story.title}`)
+export const removeSave = (story: Story) => {
+  const { lockTimeoutCallback } = storeToRefs(useSettingsStore())
+  localStorage.removeItem(`${SAVE_STORAGE_KEY}-${story.title}`)
+  localStorage.removeItem(`${UNLOCK_STORAGE_KEY}-${story.title}`)
+  lockTimeoutCallback.value = undefined
+}

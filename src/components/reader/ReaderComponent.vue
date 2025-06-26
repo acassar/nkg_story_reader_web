@@ -215,7 +215,7 @@ const toggleSettings = () => {
           <AnsweringLoader v-if="isCharacterAnswering" />
         </div>
         <div v-if="isStoryLocked">
-          Pierre est occupé {{ lockTimer / 1000 }} secondes
+          Pierre est occupé {{ Math.round(lockTimer / 1000) }} secondes
         </div>
         <TypeWriter
           @typing:end="userEndedAnswering"

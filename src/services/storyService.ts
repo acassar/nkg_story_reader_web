@@ -1,6 +1,5 @@
 import type { Story } from '@/class/StoryClass'
 import type { StoryItem } from '@/class/StoryItem'
-import { MAX_WRITING_SPEED_FACTOR } from '@/constants/settings/settingsConstant'
 import { useSettingsStore } from '@/stores/settings.store'
 
 export const StoryService = (story: Story) => {
@@ -14,11 +13,20 @@ export const StoryService = (story: Story) => {
   return { getChildren }
 }
 
-const applySpeedFactor = (speed: number) => {
-  const { writingSpeedFactor } = useSettingsStore()
-
-  if (writingSpeedFactor >= MAX_WRITING_SPEED_FACTOR) return 0 //Vitesse instantanée
-  return speed / writingSpeedFactor
+/**
+ * Apply a factor to a speed with a maximum. If the factor equals or is more that the factor, 0 is returned.
+ * @param speed original speed
+ * @param max maximum factor
+ * @param factor factor to apply
+ * @returns the modified speed
+ */
+export const applySpeedFactor = (props: {
+  speed: number
+  max: number
+  factor: number
+}) => {
+  if (props.factor >= props.max) return 0 //Vitesse instantanée
+  return props.speed / props.factor
 }
 
 /**
@@ -39,5 +47,10 @@ export const getTextWritingSpeed = (storyItem: StoryItem) => {
     Math.min(speed, MAXIMUM_WRITING_SPEED),
   )
 
-  return applySpeedFactor(speed)
+  const { writingSpeedFactor } = useSettingsStore()
+  return applySpeedFactor({
+    speed,
+    max: MAXIMUM_WRITING_SPEED,
+    factor: writingSpeedFactor,
+  })
 }
