@@ -21,7 +21,7 @@ const modelLabel = computed(() => {
   return model.value?.toString()
 })
 
-const updateAnweringSpeedFactor = (event: FocusEvent) => {
+const updateValue = (event: FocusEvent) => {
   const parsedValue = parseInt((event.target as HTMLInputElement).value)
   if (!isNaN(parsedValue)) model.value = parsedValue
 }
@@ -32,7 +32,7 @@ const updateAnweringSpeedFactor = (event: FocusEvent) => {
     <label :for="name">{{ label }}</label>
     <InputText
       v-tooltip="tooltip"
-      @blur="updateAnweringSpeedFactor"
+      @blur="updateValue"
       :model-value="modelLabel"
     />
     <Slider v-tooltip="tooltip" :name :min="min" :max="max" v-model="model" />

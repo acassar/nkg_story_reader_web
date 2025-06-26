@@ -2,12 +2,13 @@
 import { removeSave } from '@/services/saveService'
 import ButtonComponent from '../common/button/ButtonComponent.vue'
 import type { Story } from '@/class/StoryClass'
-import { ref } from 'vue'
 import FactorInput from '../common/input/FactorInput.vue'
 import {
   MAX_AWAY_TIME_FACTOR,
   MAX_WRITING_SPEED_FACTOR,
 } from '@/constants/settings/settingsConstant'
+import { storeToRefs } from 'pinia'
+import { useSettingsStore } from '@/stores/settings.store'
 
 defineProps<{
   story: Story
@@ -16,12 +17,11 @@ defineProps<{
 const isOpen = defineModel<boolean>({ required: true })
 
 const answeringSpeedTooltip =
-  'Contrôle la vitesse à laquelle le personnage écrit ses réponses. Une valeur plus élevée accélère l’affichage du texte.'
+  "Contrôle la vitesse à laquelle l'interlocuteur écrit ses réponses. Une valeur plus élevée accélère l’affichage du texte."
 const awayTimeTooltip =
   'Définit combien de temps le personnage sera absent lors de ses tâches. Plus la valeur est élevée, plus il reviendra rapidement.'
 
-const answeringSpeedFactor = ref(1)
-const awayTimeFactor = ref(1)
+const { writingSpeedFactor, awayTimeFactor } = storeToRefs(useSettingsStore())
 
 defineEmits<{
   (e: 'fullyClosed'): void
@@ -41,13 +41,13 @@ defineEmits<{
           name="answering-speed"
           label="Vitesse de réponse"
           :max="MAX_WRITING_SPEED_FACTOR"
-          v-model="answeringSpeedFactor"
+          v-model="writingSpeedFactor"
           :tooltip="answeringSpeedTooltip"
         ></FactorInput>
         <FactorInput
-          name="answering-delay"
-          label="Temps d’absence"
-          :v-model="awayTimeFactor"
+          name="away-time"
+          label="Réduction du temps d’absence"
+          v-model="awayTimeFactor"
           :max="MAX_AWAY_TIME_FACTOR"
           :tooltip="awayTimeTooltip"
         ></FactorInput>

@@ -1,5 +1,7 @@
 import type { Story } from '@/class/StoryClass'
 import type { StoryItem } from '@/class/StoryItem'
+import { MAX_WRITING_SPEED_FACTOR } from '@/constants/settings/settingsConstant'
+import { useSettingsStore } from '@/stores/settings.store'
 
 export const StoryService = (story: Story) => {
   const getChildren = (storyItem: StoryItem) => {
@@ -10,6 +12,13 @@ export const StoryService = (story: Story) => {
   }
 
   return { getChildren }
+}
+
+const applySpeedFactor = (speed: number) => {
+  const { writingSpeedFactor } = useSettingsStore()
+
+  if (writingSpeedFactor >= MAX_WRITING_SPEED_FACTOR) return 0 //Vitesse instantanée
+  return speed / writingSpeedFactor
 }
 
 /**
@@ -30,5 +39,5 @@ export const getTextWritingSpeed = (storyItem: StoryItem) => {
     Math.min(speed, MAXIMUM_WRITING_SPEED),
   )
 
-  return speed
+  return applySpeedFactor(speed)
 }
