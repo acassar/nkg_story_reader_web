@@ -4,6 +4,10 @@ import ButtonComponent from '../common/button/ButtonComponent.vue'
 import type { Story } from '@/class/StoryClass'
 import { ref } from 'vue'
 import FactorInput from '../common/input/FactorInput.vue'
+import {
+  MAX_AWAY_TIME_FACTOR,
+  MAX_WRITING_SPEED_FACTOR,
+} from '@/constants/settings/settingsConstant'
 
 defineProps<{
   story: Story
@@ -13,11 +17,11 @@ const isOpen = defineModel<boolean>({ required: true })
 
 const answeringSpeedTooltip =
   'Contrôle la vitesse à laquelle le personnage écrit ses réponses. Une valeur plus élevée accélère l’affichage du texte.'
-const answeringDelayTooltip =
+const awayTimeTooltip =
   'Définit combien de temps le personnage sera absent lors de ses tâches. Plus la valeur est élevée, plus il reviendra rapidement.'
 
 const answeringSpeedFactor = ref(1)
-const answeringDelayFactor = ref(1)
+const awayTimeFactor = ref(1)
 
 defineEmits<{
   (e: 'fullyClosed'): void
@@ -36,14 +40,16 @@ defineEmits<{
         <FactorInput
           name="answering-speed"
           label="Vitesse de réponse"
+          :max="MAX_WRITING_SPEED_FACTOR"
           v-model="answeringSpeedFactor"
           :tooltip="answeringSpeedTooltip"
         ></FactorInput>
         <FactorInput
           name="answering-delay"
           label="Temps d’absence"
-          :v-model="answeringDelayFactor"
-          :tooltip="answeringDelayTooltip"
+          :v-model="awayTimeFactor"
+          :max="MAX_AWAY_TIME_FACTOR"
+          :tooltip="awayTimeTooltip"
         ></FactorInput>
       </div>
     </div>
